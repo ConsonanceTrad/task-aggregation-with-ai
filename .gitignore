@@ -30,5 +30,3 @@ lerna-debug.log*
 
 # Obsidian plugin specific
 main.js
-manifest.json
-styles.css
