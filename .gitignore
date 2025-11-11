@@ -30,3 +30,4 @@ lerna-debug.log*
 
 # Obsidian plugin specific
 main.js
+data.json
