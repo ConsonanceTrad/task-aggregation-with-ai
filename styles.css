@@ -60,6 +60,155 @@
   line-height: 1.6;
 }
 
+/* 任务卡片样式 */
+.task-card {
+  background-color: var(--background-secondary);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 4px;
+  padding: 12px;
+  margin-bottom: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: box-shadow 0.2s, border-color 0.2s;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.task-card:hover {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  border-color: var(--interactive-normal);
+}
+
+.task-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.task-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+}
+
+/* 任务头部样式 */
+.task-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+/* 状态按钮样式 */
+
+
+.child-task-status-btn {
+   background: none;
+   border: none;
+   cursor: pointer;
+   padding: 2.4px;
+   width: 14.4px;
+   height: 14.4px;
+   border-radius: 2.4px;
+   transition: background-color 0.2s;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+  }
+
+/* 状态图标样式 */
+.status-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 10.8px;
+  height: 10.8px;
+}
+
+.status-icon svg {
+  width: 100%;
+  height: 100%;
+  color: inherit;
+}
+
+
+
+
+
+/* 跳转图标样式 */
+.jump-icon {
+  width: 10.8px;
+  height: 10.8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.jump-icon svg {
+  width: 100%;
+  height: 100%;
+  color: inherit;
+}
+
+
+
+/* 任务内容样式 */
+.task-content {
+  color: var(--text-normal);
+  line-height: 1.6;
+}
+
+.parent-task-text {
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+/* 子任务样式 */
+.child-tasks {
+  margin-left: 24px;
+  margin-top: 8px;
+}
+
+.child-task {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 6px;
+  padding: 4px 0;
+}
+
+.child-task-text {
+  color: var(--text-muted);
+  font-size: 13px;
+  flex: 1;
+}
+
+/* 已完成任务样式 */
+.task-completed .parent-task-text,
+.task-completed .child-task-text {
+  text-decoration: line-through;
+  color: var(--text-faint);
+}
+
+
+
+/* 刷新按钮样式 */
+.auto-task-viewer-refresh-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+  font-size: 16px;
+}
+
+.auto-task-viewer-refresh-btn:hover {
+  background-color: var(--background-modifier-hover);
+}
+
 .auto-task-panel-button {
   display: flex;
   align-items: center;
