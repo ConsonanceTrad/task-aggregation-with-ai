@@ -55,9 +55,31 @@
 
 .auto-task-viewer-content {
   min-height: 200px;
+  max-height: calc(100vh - 120px); /* 设置最大高度，考虑窗口高度和其他元素 */
+  overflow-y: auto; /* 允许垂直滚动 */
   color: var(--text-muted);
   font-size: 14px;
-  line-height: 1.6;
+  line-height: 0;
+  padding-right: 4px; /* 为滚动条预留空间 */
+}
+
+/* 自定义滚动条样式 */
+.auto-task-viewer-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.auto-task-viewer-content::-webkit-scrollbar-track {
+  background: var(--background-secondary);
+  border-radius: 4px;
+}
+
+.auto-task-viewer-content::-webkit-scrollbar-thumb {
+  background: var(--background-modifier-border);
+  border-radius: 4px;
+}
+
+.auto-task-viewer-content::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
 }
 
 /* 任务卡片样式 */
@@ -165,16 +187,17 @@
 
 /* 子任务样式 */
 .child-tasks {
-  margin-left: 24px;
-  margin-top: 8px;
+  margin-left: 0px;
+  margin-top: 0px;
 }
 
 .child-task {
   display: flex;
   align-items: flex-start;
-  gap: 8px;
-  margin-bottom: 6px;
-  padding: 4px 0;
+  gap: 4px;
+  margin-left: 24px;
+  margin-top: 20px;
+  padding: 0px 0;
 }
 
 .child-task-text {
@@ -232,4 +255,156 @@
 .auto-task-viewer-close-btn:hover {
   background-color: var(--background-modifier-hover);
   color: var(--text-normal);
+}
+
+
+/* 任务项基础样式 */
+.task-item {
+  display: block; /* 确保每个任务项都显示在单独的行上 */
+  margin-bottom: 8px;
+  word-wrap: break-word;
+  white-space: normal;
+}
+
+/* 父任务文本样式 */
+.parent-task .task-text {
+  font-weight: 500;
+  display: block;
+  word-wrap: break-word;
+}
+
+/* 子任务容器样式 */
+.child-tasks {
+  margin-left: 0;
+  margin-top: 4px;
+  padding-left: 0;
+}
+
+/* 子任务基础样式 */
+.child-task {
+  display: block; /* 确保每个子任务都显示在单独的行上 */
+  margin-left: 24px;
+  margin-bottom: 6px;
+  padding: 0;
+  word-wrap: break-word;
+}
+
+/* 子任务文本样式 */
+.child-task .task-text {
+  color: var(--text-muted);
+  font-size: 13px;
+  display: block;
+  word-wrap: break-word;
+}
+
+/* 任务编辑窗口样式 */
+.task-edit-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.task-edit-modal-content {
+  background-color: var(--background-primary);
+  border-radius: 8px;
+  padding: 24px;
+  width: 100%;
+  max-width: 500px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--background-secondary);
+}
+
+.task-edit-title {
+  margin-top: 0;
+  margin-bottom: 16px;
+  color: var(--text-primary);
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.task-edit-textarea {
+  width: 100%;
+  min-height: 120px;
+  padding: 12px;
+  margin-bottom: 20px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 4px;
+  background-color: var(--background-secondary);
+  color: var(--text-primary);
+  font-family: var(--font-text);
+  font-size: 14px;
+  resize: vertical;
+  box-sizing: border-box;
+}
+
+.task-edit-textarea:focus {
+  outline: none;
+  border-color: var(--interactive-accent);
+  box-shadow: 0 0 0 2px rgba(79, 93, 149, 0.2);
+}
+
+.task-edit-textarea::placeholder {
+  color: var(--text-muted);
+}
+
+.task-edit-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.task-edit-button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.task-edit-cancel {
+  background-color: var(--background-modifier-border);
+  color: var(--text-primary);
+}
+
+.task-edit-cancel:hover {
+  background-color: var(--background-modifier-hover);
+}
+
+.task-edit-confirm {
+  background-color: var(--interactive-accent);
+  color: white;
+}
+
+.task-edit-confirm:hover {
+  background-color: var(--interactive-accent-hover);
+}
+
+/* 响应式调整 */
+@media (max-width: 600px) {
+  .task-edit-modal {
+    padding: 10px;
+  }
+  
+  .task-edit-modal-content {
+    padding: 16px;
+  }
+  
+  .task-edit-buttons {
+    flex-direction: column;
+  }
+  
+  .task-edit-button {
+    width: 100%;
+    text-align: center;
+  }
 }
