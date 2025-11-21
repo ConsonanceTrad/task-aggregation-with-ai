@@ -67,7 +67,7 @@ export class TaskAISettingsTab extends PluginSettingTab {
 		const fileTab = tabsContainer.createEl('div', { cls: 'setting-tab active', text: '文件设置' });
 		const aiTab = tabsContainer.createEl('div', { cls: 'setting-tab', text: 'API 设置' });
 		const triggerTab = tabsContainer.createEl('div', { cls: 'setting-tab', text: '触发式生成' });
-		const extensionTab = tabsContainer.createEl('div', { cls: 'setting-tab', text: '拓展标签' });
+		// const extensionTab = tabsContainer.createEl('div', { cls: 'setting-tab', text: '拓展标签' });
 		const aboutTab = tabsContainer.createEl('div', { cls: 'setting-tab', text: '关于' });
 
 		// 创建文件设置内容容器
@@ -351,24 +351,26 @@ export class TaskAISettingsTab extends PluginSettingTab {
 		renderTimedQueries();
 
 		// 创建拓展标签设置内容容器
-		const extensionSettingsContent = containerEl.createEl('div', { cls: 'setting-tab-content' });
-		extensionSettingsContent.createEl('p', { text: '将在后续版本完善' });
+		// const extensionSettingsContent = containerEl.createEl('div', { cls: 'setting-tab-content' });
+		// extensionSettingsContent.createEl('p', { text: '将在后续版本完善' });
 
 		// 创建关于设置内容容器
 		const aboutSettingsContent = containerEl.createEl('div', { cls: 'setting-tab-content' });
-		aboutSettingsContent.createEl('h3', { text: '关于Task AI' });
-		aboutSettingsContent.createEl('p', { text: '- Task AI 插件是为了整合我所要做的事项所开发的自用插件，一些操作的设计会更贴合我的习惯，影响最大的可能是这个插件暂时只使用 Deepseek 的解释模型进行交互，后续可能会考虑加入其他模型。我会持续根据我自身的需求进行优化，如果时间充裕，我会根据社区反馈进行调整。' });
-		aboutSettingsContent.createEl('p', { text: '- 这个插件的设计目的是：针对我这一不习惯使用Task那样严格定义的语法的人，通过整合 AI 深度思考，以自动化的列举每日需完成的事项。' });
+		aboutSettingsContent.createEl('h3', { text: '关于 Task AI' });
+		aboutSettingsContent.createEl('p', { text: 'Task AI 插件是为了整合我所要做的事项所开发的自用插件，一些操作的设计会更贴合我的习惯，影响最大的可能是这个插件暂时只使用 Deepseek 的解释模型进行交互，后续可能会考虑加入其他模型。我会持续根据我自身的需求进行优化，如果时间充裕，我会根据社区反馈进行调整。' });
+		aboutSettingsContent.createEl('p', { text: '这个插件的设计目的是：针对我这样不习惯使用类似 Task 那样严格定义的语法的人，通过整合 AI 深度思考，以自动化的列举每日需完成的事项。' });
 		aboutSettingsContent.createEl('h3', { text: '入门教程' });
-		aboutSettingsContent.createEl('p', { text: '- 在使用所有功能前，你需要注册一个 Deepseek 开放平台账号，获取到 API Key，并充值一定的金额。传送门：[Deepseek 开放平台](https://platform.deepseek.com/register)' });
-		aboutSettingsContent.createEl('p', { text: '- 主要功能：触发式生成。此功能可以根据你设置的定时任务，自动触发 AI 深度思考，写入指定的文件中。此外，如果你拥有 flomo 平台会员，你可以在插件设置中配置 flomo API ，使插件在触发式生成后，自动将结果发送到 flomo 平台，方便你在手机端查看。' });
-		aboutSettingsContent.createEl('p', { text: '- 辅助功能：持续性对话与以时间戳形式保存对话记录，通过指令开启发送消息的模态框，以选定的提示词文件向AI进行持续询问。' });
+		aboutSettingsContent.createEl('p', { text: '在使用所有功能前，你需要注册一个 Deepseek 开放平台账号，获取到 API Key，并充值一定的金额。' });
+		aboutSettingsContent.createEl('p', { text: '其次，你需要打开核心插件日记，以供触发式生成写出结果。' });
+		aboutSettingsContent.createEl('p', { text: '主要功能：触发式生成。此功能可以根据你设置的定时任务，自动读取任务集文件夹发送向 AI 让其进行任务整合，将结果写入当天的日记文件中。' });
+		aboutSettingsContent.createEl('p', { text: '此外，如果你拥有 flomo 平台会员，你可以在插件设置中配置 flomo API ，使插件在触发式生成后，自动将结果发送到 flomo 平台，方便你在手机端查看。' });
+		aboutSettingsContent.createEl('p', { text: '辅助功能：持续性对话与以时间戳形式保存对话记录，通过指令开启发送消息的模态框，以选定的提示词文件向AI进行持续询问。' });
 		aboutSettingsContent.createEl('h3', { text: '更新日志' });
-		aboutSettingsContent.createEl('p', { text: 'v1.0.0: 完成两项基本功能搭建，包括自定义提示词的持续性对话与保存、自定义提示词的定时任务整合、完成定时任务后自动化的发送向 flomo 平台以方便手机端查阅。后续更新事项为：完善标签系统定义，使其作为提示词的一部分，以帮助 AI 更好的处理标签。' });
+		aboutSettingsContent.createEl('p', { text: 'v1.0.0: 完成两项基本功能搭建，包括自定义提示词的持续性对话与保存、自定义提示词的定时任务整合、完成定时任务后自动化的发送向 flomo 平台以方便手机端查阅。' });
 
 		// 标签页切换逻辑
-		const tabs = [fileTab, aiTab, triggerTab, extensionTab, aboutTab];
-		const tabContents = [fileSettingsContent, aiSettingsContent, triggerSettingsContent, extensionSettingsContent, aboutSettingsContent];
+		const tabs = [fileTab, aiTab, triggerTab, aboutTab];
+		const tabContents = [fileSettingsContent, aiSettingsContent, triggerSettingsContent, aboutSettingsContent];
 
 		tabs.forEach((tab, index) => {
 			tab.addEventListener('click', () => {

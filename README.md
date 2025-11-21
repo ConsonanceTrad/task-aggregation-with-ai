@@ -1,99 +1,37 @@
-# Auto Task Panel With AI
+- 更新声明：这个插件是为了整合我所要做的事项所开发的自用插件，一些操作的设计会更贴合我的习惯（包括插件所使用的 **语言将以中文为主** 、暂时只会使用 Deepseek 的解释模型）。我会持续根据我自身的需求进行优化，如果时间充裕，我会根据社区反馈进行调整。
+- 这个插件的设计目的是：针对我这样不习惯使用类似 Task 那样严格定义的语法的人，通过整合 AI 深度思考，以自动化的列举每日需完成的事项。
+- 在使用所有功能前，你需要注册一个 Deepseek 开放平台账号，获取到 API Key，并充值一定的金额。传送门：[Deepseek 开放平台](https://platform.deepseek.com/register)
+- 主要功能：触发式生成。此功能可以根据你设置的定时任务，自动读取任务集文件夹发送向 AI 让其进行任务整合，将结果写入当天的日记文件中。
+	- 此外，如果你拥有 flomo 平台会员，你可以在插件设置中配置 flomo API ，使插件在触发式生成后，自动将结果发送到 flomo 平台，方便你在手机端查看。
+- 辅助功能：持续性与 AI 进行对话，并以时间戳形式保存对话记录。通过指令开启发送消息的模态框，以选定的提示词文件向AI进行持续询问。
 
-An Obsidian plugin that helps you quickly generate and manage tasks with AI assistance.
-
-## Features
-
-- **AI Message Panel**: A floating panel for interacting with AI to generate and analyze tasks
-- **Automatic Folder Creation**: Creates necessary folders for task management
-- **Default Prompt**: Comes with a pre-configured prompt for AI task generation
-- **Customizable Settings**: Allows you to configure AI prompts and other settings
-- **Keyboard Shortcuts**: Quick commands to open/close/toggle the AI message panel
-
-## Installation
-
-1. Place the `Auto Task Panel With AI` folder in your Obsidian plugins directory (`Vault/.obsidian/plugins/`)
-2. Enable the plugin in Obsidian's settings
-3. Restart Obsidian if prompted
-
-## Usage
-
-### Opening the AI Message Panel
-
-- Use the command `Toggle AI Message Panel` from the Obsidian command palette
-- Or use the commands `Open AI Message Panel` and `Close AI Message Panel` separately
-
-### Interacting with AI
-
-1. Type your task request or question in the input box
-2. Click the "Send" button or press `Ctrl+Enter` to send
-3. The AI will respond with task suggestions or analysis
-
-### Default Prompt
-
-The plugin includes a default prompt that guides the AI to help with task analysis and generation. You can find this prompt in the `_Root/plugin/Task-AI/prompts/TaskAIDefaultPrompt.md` file.
-
-## Plugin Structure
-
+## 自动创建适应的文件夹结构
+- 在插件打开或库打开时，这些文件结构会自动创建，你可以指定其他文件结构用于替代它们
+- 仅有设置为任务集内的任务可以被识别
 ```
-Auto Task Panel With AI/
-├── manifest.json          # Plugin manifest
-├── package.json           # Dependencies and scripts
-├── main.js               # Compiled plugin code
-├── main.js.map           # Source map
-├── styles.css            # Plugin styles
-├── ts/                  # TypeScript source files
-│   ├── main.ts         # Main plugin entry point
-│   ├── panel/          # UI components
-│   │   └── ai-message-panel.ts
-│   └── settings.ts     # Plugin settings
-├── tsconfig.json        # TypeScript configuration
-└── esbuild.config.mjs   # Build configuration
+_Root/plugin/Task-AI/
+_Root/plugin/Task-AI/prompts/
+_Root/plugin/Task-AI/prompts/TaskAIDefaultPrompt.md
+_Root/plugin/Task-AI/history/
+Task-AI 任务集/
 ```
 
-## Settings
+## AI 配置
+- 以下功能需要你有 Deepseek api ，并且使用思考模式模型 `deepseek-reasoner` 。
+	- 我对 AI 的使用策略相对保守，因此在我设计的插件中 AI 不参与决策和对内容含义的实质修改。它仅用于 **提炼整合信息** 和 **替代难以设计以适应不同需求的格式化工具** 。
+	- 但考虑到可能有需求，我依旧给出了自由质询的功能以供使用。
+	- 我对任务安排类信息的隐私需求度不高，可以接受其被上传到服务器，如果你有顾虑的话，请不要使用这个功能。
 
-### Default Prompt File
+## 触发式生成
+- 此功能可以根据你设置的定时任务，自动读取任务集文件夹发送向 AI 让其进行任务整合，将结果写入当天的日记文件中。
+    - 需要开启 obsidian 的日记插件以写入 AI 生成信息
+- 在配置flomo API 后，你可以将信息手动或自动的发送到你的 Flomo 中，以便移动端查看。
+- 由于 AI 协作，你可以不需要费力设计或记忆标签系统，尤其是关于重复性周期性的时间标签。
+	- **使用 AI 协作，你可以以自然语言形式** 自由编辑时间、项目等区别标签而不需要去注重格式。
+	- 例如，你希望每月第二个周末进行一次大清扫，如果使用正常时间标签，就我的经验而言，这很难设计，更难使用，甚至会因为太过抽象而遗忘标准。使用 AI ，你将不需要费时间记忆那些格式，以你自己觉得能够说清的方式来说就可以。
 
-Path to the default prompt file used by the AI. Default: `_Root/plugin/Task-AI/prompts/TaskAIDefaultPrompt.md`
-
-## Commands
-
-- `Open AI Message Panel`: Opens the AI message panel
-- `Close AI Message Panel`: Closes the AI message panel
-- `Toggle AI Message Panel`: Toggles the AI message panel open/closed
-
-## Keyboard Shortcuts
-
-You can assign custom keyboard shortcuts to the plugin commands in Obsidian's settings.
-
-## Development
-
-### Prerequisites
-
-- Node.js
-- npm
-
-### Build
-
-```bash
-npm run build
-```
-
-### Watch Mode
-
-```bash
-npm run dev
-```
-
-## License
-
-MIT
-
-## Author
-
-[Your Name]
-
-## Version
-
-1.0.0
+##  AI 消息
+- AI消息为默认在右侧边栏展开的视图，你可以在此处阅览AI为你生成的信息，并通过点击消息将其复制。
+- AI 信息将自动以时间戳形式写入插件的历史消息文件夹
+- 你也可以通过点击按钮，以插入一段自定义的 AI 问询。
+- 被设定为静默输入的 AI生成指令不会在此处展示

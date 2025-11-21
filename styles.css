@@ -831,6 +831,6 @@
   border: 1px solid var(--background-modifier-border);
 }
 
-.task-ai-trigger-settings-content.active > div:nth-child(9) > div.setting-item-info{
+.task-ai-trigger-settings-content.active > div:nth-child(8) > div.setting-item-info{
   display: none;
 }
