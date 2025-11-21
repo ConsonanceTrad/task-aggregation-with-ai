@@ -28,7 +28,7 @@ export interface TaskAISettings {
 export const DEFAULT_SETTINGS: TaskAISettings = {
 	historyFolder: '_Root/plugin/Task-AI/history',
 	promptsFolder: '_Root/plugin/Task-AI/prompts',
-	defaultPromptFile: '__default__',
+	defaultPromptFile: '_Root/plugin/Task-AI/prompts/default.md',
 	taskCollectionsFolder: 'Task-AI 任务集',
 	deepseekApiKey: '',
 	deepseekModel: 'deepseek-reasoner',

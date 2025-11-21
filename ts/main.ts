@@ -132,27 +132,27 @@ export default class TaskAI extends Plugin {
 		// 注册命令：打开AI消息面板
 		this.addCommand({
 			id: 'ai-message-panel-open',
-			name: 'Open AI Message Panel',
+			name: '打开 AI 消息面板',
 			callback: () => this.openAIMessagePanel()
 		});
 		
 		// 注册命令：发送查询给AI
-			this.addCommand({
-				id: 'ai-message-send-query',
-				name: 'Send Query to AI',
-				callback: () => this.showAIQueryDialog()
-			});
+		this.addCommand({
+			id: 'ai-message-send-query',
+			name: '询问 AI',
+			callback: () => this.showAIQueryDialog()
+		});
 
-			// 监听新会话事件（使用类型断言解决TypeScript类型检查）
-			this.app.workspace.on('taskai:new-session' as any, async () => {
-				await this.startNewSession();
-			});
+		// 监听新会话事件（使用类型断言解决TypeScript类型检查）
+		this.app.workspace.on('taskai:new-session' as any, async () => {
+			await this.startNewSession();
+		});
 
-			// 监听面板打开事件，更新会话ID
-			this.app.workspace.on('taskai:panel-opened' as any, (panel: unknown) => {
-				const messagePanel = panel as AI_Message_Panel;
-				messagePanel.updateSessionId(this.currentSessionId);
-			});
+		// 监听面板打开事件，更新会话ID
+		this.app.workspace.on('taskai:panel-opened' as any, (panel: unknown) => {
+			const messagePanel = panel as AI_Message_Panel;
+			messagePanel.updateSessionId(this.currentSessionId);
+		});
 
 		// 初始化状态栏
 		this.statusBarItem = this.addStatusBarItem();
@@ -377,7 +377,7 @@ export default class TaskAI extends Plugin {
 
 	private async sendToDeepSeek(prompt: string, userInput: string, selectedPrompt: string) {
 		if (!this.settings.deepseekApiKey) {
-			new Notice('Please set your DeepSeek API Key in settings');
+			new Notice('设置你的 DeepSeek API Key 以使用此功能。');
 			return;
 		}
 		
