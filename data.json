@@ -1,0 +1,57 @@
+{
+  "historyFolder": "_Root/plugin/Task-AI/history",
+  "promptsFolder": "_Root/plugin/Task-AI/prompts",
+  "defaultPromptFile": "_Root/plugin/Task-AI/prompts/TaskAIDefaultPrompt.md",
+  "taskCollectionsFolder": "Task-AI 任务集",
+  "deepseekApiKey": "sk-4ece0221ce354f24b436203e3a13c3df",
+  "deepseekModel": "deepseek-reasoner",
+  "isFlomoEnabled": true,
+  "flomoApiKey": "https://flomoapp.com/iwh/MzgxOTEy/5942a896fd3719db5dd208ec84ae8fe7/",
+  "isTimedTaskEnabled": true,
+  "timedTaskInterval": 1,
+  "triggerPrompt": "- 你是一个任务整合领域的专家，在正式回答中，请不要列举你做了什么，直接列举结果，这对你应该很容易。另外，格式上如果需要使用缩进以表示从属结构，请使用四个空格形成的缩进。\n- 任务特指md文件格式中的任务列表格式（- [ ]未完成任务与- [x]已完成任务）。我需要你根据我给你的任务与当前时间 ，帮我对未完成任务进行任务整合。\n- 请准确地、不加扩展地、不臆想捏造地、以下列顺序地、以开始时间顺序精确贴合日期地列举以下信息并列举在独立的md三级标题下：\n\t1. 以任务列表格式列举今日需要执行的事项（保留源文本信息，但标签只需要保留时间相关标签，其中重复事项不需要多次列举，只需要保留重复规则标签与首个下次需要进行的时间。子任务如果没有指定时间标签则以其所属任务的执行时间为准。） \n\t2. 以无序列表形式列举15天以内或未标注执行时间的待办事项，对标签的附加要求与第一点括号内一致（已在第一点内提及的事项此处不需要再次提及）\n\t3. 以无序列表形式简要描述项目内容（md标题形式记为项目）\n\t4. 以无序列表形式标明以上所有信息的来源文件",
+  "timedQueries": [
+    {
+      "time": "09:00",
+      "promptFile": "__default__",
+      "targetFile": "{{today}}.md",
+      "enabled": true,
+      "includeCurrentTime": true,
+      "includeTaskInfo": true
+    }
+  ],
+  "defaultTriggerPrompt": "- 你是一个任务整合领域的专家，在正式回答中，请不要列举你做了什么，直接列举结果，这对你应该很容易。另外，格式上如果需要使用缩进以表示从属结构，请使用四个空格形成的缩进。\n- 任务特指md文件格式中的任务列表格式（- [ ]未完成任务与- [x]已完成任务）。我需要你根据我给你的任务与当前时间 ，帮我对未完成任务进行任务整合。\n- 请准确地、不加扩展地、不臆想捏造地、以下列顺序地、以开始时间顺序精确贴合日期地列举以下信息并列举在独立的md三级标题下：\n\t1. 以任务列表格式列举今日需要执行的事项（保留源文本信息，但标签只需要保留时间相关标签，其中重复事项不需要多次列举，只需要保留重复规则标签与首个下次需要进行的时间。子任务如果没有指定时间标签则以其所属任务的执行时间为准。） \n\t2. 以无序列表形式列举15天以内或未标注执行时间的待办事项，对标签的附加要求与第一点括号内一致（已在第一点内提及的事项此处不需要再次提及）\n\t3. 以无序列表形式简要描述项目内容（md标题形式记为项目）\n\t4. 以无序列表形式标明以上所有信息的来源文件",
+  "pluginFolder": "_Root/plugin/Task-AI",
+  "autoOpenRightSidebar": true,
+  "dataFolderPath": "_Root/PluginSettings/AutoTaskPanel",
+  "promptsFolderPath": "_Root/PluginSettings/AutoTaskPanel/prompts",
+  "defaultPromptFilePath": "_Root/PluginSettings/AutoTaskPanel/prompts/DefaultPrompt.md",
+  "logTemplateFilePath": "_Root/PluginSettings/AutoTaskPanel/diarySettings.md",
+  "logFilesFolderPath": "AutoTask 日志",
+  "taskFolderPath": "AutoTask 任务",
+  "tpvPanelEnabled": true,
+  "aiPanelEnabled": true,
+  "dailyLogEnabled": true,
+  "refreshInterval": 0,
+  "clickAction": "jump",
+  "ctrlClickAction": "edit",
+  "aiMessageHistory": [
+    {
+      "text": "123",
+      "sender": "user",
+      "timestamp": 1763018294666
+    },
+    {
+      "text": "111",
+      "sender": "user",
+      "timestamp": 1763018296674
+    },
+    {
+      "text": "11",
+      "sender": "user",
+      "timestamp": 1763018298330
+    }
+  ],
+  "tpPanelEnabled": true,
+  "aiMessagePanelEnabled": true
+}

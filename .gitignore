@@ -27,7 +27,3 @@ lerna-debug.log*
 *.njsproj
 *.sln
 *.sw?
-
-# Obsidian plugin specific
-main.js
-data.json
