@@ -1,11 +1,11 @@
 {
-  "id": "Task-AI",
+  "id": "task-ai",
   "name": "Task AI",
   "version": "1.0.0",
   "minAppVersion": "1.0.0",
   "description": "借用 AI 进行任务快速整合生成。",
-  "author": "",
-  "authorUrl": "",
+  "author": "ConsonanceTrad",
+  "authorUrl": "https://github.com/ConsonanceTrad",
   "isDesktopOnly": false,
   "css": "styles.css"
 }
