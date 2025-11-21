@@ -1,5 +1,5 @@
-- 更新声明：这个插件所使用的 **语言将以中文为主** 、并且暂时只会使用 Deepseek 的解释模型。我会持续根据我自身的需求进行优化，如果时间充裕，我会根据社区反馈进行调整。
-- 这个插件的设计目的是：针对我这样不习惯使用类似 Task 那样严格定义的语法的人，通过整合 AI 深度思考，以自动化的列举每日需完成的事项。
+- 更新声明：这个插件所使用的 **语言将以中文为主** 、并且暂时只会使用 Deepseek 的解释模型。如果时间充裕，我会根据社区反馈进行调整。
+- 这个插件针对我这样不习惯使用类似 Task 那样严格定义的语法的人所设计，通过 AI 自动化的列举每日需完成的事项。
 - 在使用所有功能前，你需要注册一个 Deepseek 开放平台账号，获取到 API Key，并充值一定的金额。传送门：[Deepseek 开放平台](https://platform.deepseek.com/register)
 - 主要功能：触发式生成。此功能可以根据你设置的定时任务，自动读取任务集文件夹发送向 AI 让其进行任务整合，将结果写入当天的日记文件中。
 	- 此外，如果你拥有 flomo 平台会员，你可以在插件设置中配置 flomo API ，使插件在触发式生成后，自动将结果发送到 flomo 平台，方便你在手机端查看。
@@ -25,7 +25,7 @@ Task-AI 任务集/
 ## 触发式生成
 - 此功能可以根据你设置的定时任务，自动读取任务集文件夹发送向 AI 让其进行任务整合，将结果写入当天的日记文件中。
     - 需要开启 obsidian 的日记插件以写入 AI 生成信息
-- 在配置 flomo API 后，你可以将信息手动或自动的发送到你的 Flomo 中，以便移动端查看。
+- 在配置 flomo API 后，可以自动将生成内容发送到你的 Flomo 中，以便移动端查看。
 - 由于 AI 协作，你可以不需要费力设计或记忆标签系统，尤其是关于重复性周期性的时间标签。
 	- **使用 AI 协作，你可以以自然语言形式** 自由编辑时间、项目等区别标签而不需要去注重格式。
 	- 例如，你希望每月第二个周末进行一次大清扫，如果使用正常时间标签，就我的经验而言，这很难设计，更难使用，甚至会因为太过抽象而遗忘标准。使用 AI ，你将不需要费时间记忆那些格式，以你自己觉得能够说清的方式来说就可以。
@@ -58,7 +58,7 @@ Task-AI task collection/
 ## Tactile generation
 - This feature allows you to set up your own fixed time assignments, auto-manage your assignments, and send them to AI in order to coordinate your work, and copy the future results into the current daily record. 
 - Demand opening obsidian's daily record and copying AI generated information
-- After locating Flomo API, you can send the information manually or automatically send it to Flomo, then check the transfer end.
+- After locating Flomo API, you can send the information to Flomo, then check the transfer end.
 - Yuyu AI fabrication, you can design or record memory without any additional costs, which means that you can design the periodic time. 
 - **Use AI fabrication，You can use natural language form** Freely set the time, item etc. can be separated and not required. 
 - For example, if you wish to move forward at the end of the second month of each month, you will be able to use the normal time designation, write your own words, further design, change usage, and the result will be abstracted and forgotten. Use AI, you don't have to worry about the cost of time, so you can understand it yourself.
