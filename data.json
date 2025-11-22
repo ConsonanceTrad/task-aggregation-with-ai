@@ -1,8 +1,8 @@
 {
   "historyFolder": "_Root/plugin/Task-AI/history",
   "promptsFolder": "_Root/plugin/Task-AI/prompts",
-  "defaultPromptFile": "_Root/plugin/Task-AI/prompts/TaskAIDefaultPrompt.md",
-  "taskCollectionsFolder": "Task-AI 任务集",
+  "defaultPromptFile": "_Root/plugin/Task-AI/prompts/default.md",
+  "taskCollectionsFolder": "Task Box",
   "deepseekApiKey": "sk-4ece0221ce354f24b436203e3a13c3df",
   "deepseekModel": "deepseek-reasoner",
   "isFlomoEnabled": true,

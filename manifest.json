@@ -1,10 +1,10 @@
 {
-  "id": "task-ai",
-  "name": "Task AI",
+  "id": "task-aggre-ai",
+  "name": "Task Aggregation With AI",
   "version": "1.0.0",
   "minAppVersion": "1.0.0",
-  "description": "Use AI for fast matching tasks todo.",
+  "description": "Using Deepseek AI for task aggregation daily and automatically.",
   "author": "ConsonanceTrad",
   "authorUrl": "https://github.com/ConsonanceTrad",
-  "isDesktopOnly": false
+  "isDesktopOnly": true
 }

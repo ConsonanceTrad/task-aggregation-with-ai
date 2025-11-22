@@ -28,222 +28,15 @@ __export(main_exports, {
   default: () => TaskAI
 });
 module.exports = __toCommonJS(main_exports);
-var import_obsidian3 = require("obsidian");
-
-// ts/panel/ai-message-panel.ts
-var import_obsidian = require("obsidian");
-var VIEW_TYPE_AI_MESSAGE = "ai-message-panel";
-var AI_Message_Panel = class extends import_obsidian.ItemView {
-  constructor(leaf) {
-    super(leaf);
-    this.panel = this.contentEl;
-  }
-  getViewType() {
-    return VIEW_TYPE_AI_MESSAGE;
-  }
-  getDisplayText() {
-    return "Message";
-  }
-  getIcon() {
-    return "compass";
-  }
-  async onOpen() {
-    this.panel = this.contentEl;
-    this.panel.id = "ai-message-panel";
-    this.panel.className = "ai-message-panel";
-    const header = document.createElement("div");
-    header.className = "ai-message-panel-header";
-    header.innerHTML = `<h3>AI \u6D88\u606F\u9762\u677F</h3>`;
-    const sessionIdElement = document.createElement("div");
-    sessionIdElement.className = "ai-session-id";
-    sessionIdElement.textContent = "\u4F1A\u8BDDID\uFF1A\u7A7A";
-    this.app.workspace.trigger("taskai:panel-opened", this);
-    const newSessionBtn = document.createElement("button");
-    newSessionBtn.id = "new-session-btn";
-    newSessionBtn.setAttribute("data-tooltip", "\u5F00\u542F\u65B0\u4F1A\u8BDD");
-    newSessionBtn.setAttribute("data-tooltip-position", "top");
-    newSessionBtn.className = "has-tooltip";
-    newSessionBtn.textContent = "\u8F6C\u5230\u65B0\u4F1A\u8BDD";
-    newSessionBtn.addEventListener("click", () => {
-      this.app.workspace.trigger("taskai:new-session");
-    });
-    header.appendChild(newSessionBtn);
-    const messageContainer = document.createElement("div");
-    messageContainer.className = "ai-message-container";
-    this.panel.appendChild(header);
-    this.panel.appendChild(messageContainer);
-    this.addEventListeners(this.panel);
-  }
-  async onClose() {
-  }
-  addEventListeners(panel) {
-    const sendButton = panel.querySelector("#ai-message-send");
-    if (sendButton) {
-      sendButton.addEventListener("click", () => this.send());
-    }
-    const input = panel.querySelector("#ai-message-input");
-    if (input) {
-      input.addEventListener("keydown", (e) => {
-        if (e.key === "Enter" && e.ctrlKey) {
-          this.send();
-        }
-      });
-    }
-    const copyButton = panel.querySelector("#ai-message-copy");
-    if (copyButton) {
-      copyButton.addEventListener("click", () => this.copy());
-    }
-  }
-  send() {
-    const input = this.panel.querySelector("#ai-message-input");
-    const message = input.value.trim();
-    if (message) {
-      input.value = "";
-      this.addMessageToContainer(message, "user");
-      setTimeout(() => {
-        this.addMessageToContainer("\u8FD9\u662F\u4E00\u4E2A\u6A21\u62DF\u7684AI\u54CD\u5E94\u3002", "ai");
-      }, 1e3);
-    }
-  }
-  copy() {
-    const messageContainer = this.panel.querySelector(".ai-message-container");
-    if (messageContainer) {
-      const messages = messageContainer.querySelectorAll(".ai-message");
-      let text = "";
-      messages.forEach((msg) => {
-        text += msg.textContent || "";
-        text += "\n";
-      });
-      navigator.clipboard.writeText(text).then(() => {
-        console.log("\u590D\u5236\u6210\u529F");
-      });
-    }
-  }
-  async addMessageToContainer(message, type) {
-    const messageContainer = this.panel.querySelector(".ai-message-container");
-    if (messageContainer) {
-      const messageElement = document.createElement("div");
-      messageElement.className = `ai-message ai-message-${type}`;
-      if (type === "ai") {
-        messageElement.innerHTML = `
-					<div class="ai-message-content">
-						<div class="ai-message-markdown"></div>
-					</div>
-					<button class="ai-message-copy-btn" title="\u590D\u5236\u56DE\u590D">
-						<!-- \u590D\u5236\u56FE\u6807 -->
-						<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-copy"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-					</button>
-				`;
-        const markdownContainer = messageElement.querySelector(".ai-message-markdown");
-        if (markdownContainer) {
-          await import_obsidian.MarkdownRenderer.render(this.app, message, markdownContainer, "", this);
-          messageElement.setAttribute("data-md-content", message);
-        }
-        const copyBtn = messageElement.querySelector(".ai-message-copy-btn");
-        copyBtn.addEventListener("click", () => {
-          var _a;
-          const content = ((_a = messageElement.querySelector(".ai-message-markdown")) == null ? void 0 : _a.textContent) || "";
-          navigator.clipboard.writeText(content).then(() => {
-            copyBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-check"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
-            setTimeout(() => {
-              copyBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-copy"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`;
-            }, 2e3);
-          }).catch((err) => {
-            console.error("\u590D\u5236\u5931\u8D25:", err);
-          });
-        });
-      } else {
-        messageElement.innerHTML = `<p>${message}</p>`;
-      }
-      messageContainer.appendChild(messageElement);
-      messageContainer.scrollTop = messageContainer.scrollHeight;
-      return messageElement;
-    }
-    return null;
-  }
-  async createEmptyAIMessage() {
-    const messageContainer = this.panel.querySelector(".ai-message-container");
-    if (messageContainer) {
-      const messageElement = document.createElement("div");
-      messageElement.className = `ai-message ai-message-ai`;
-      messageElement.innerHTML = `
-				<div class="ai-message-content">
-					<div class="ai-message-markdown">
-						<div class="ai-message-loading">
-							AI \u601D\u8003\u4E2D <span class="ai-loading-spinner">|</span>
-						</div>
-					</div>
-				</div>
-				<button class="ai-message-copy-btn" title="\u590D\u5236\u56DE\u590D">
-					<!-- \u590D\u5236\u56FE\u6807 -->
-					<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-copy"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-				</button>
-			`;
-      messageContainer.appendChild(messageElement);
-      messageContainer.scrollTop = messageContainer.scrollHeight;
-      const spinner = messageElement.querySelector(".ai-loading-spinner");
-      if (spinner) {
-        const spinnerChars = ["|", "/", "-", "\\"];
-        let index = 0;
-        const intervalId = setInterval(() => {
-          index = (index + 1) % spinnerChars.length;
-          spinner.textContent = spinnerChars[index];
-        }, 200);
-        messageElement.loadingIntervalId = intervalId;
-      }
-      return messageElement;
-    }
-    return null;
-  }
-  async updateMessageElement(messageElement, newContent) {
-    const markdownContainer = messageElement.querySelector(".ai-message-markdown");
-    const pElement = messageElement.querySelector("p");
-    const loadingIntervalId = messageElement.loadingIntervalId;
-    if (loadingIntervalId) {
-      clearInterval(loadingIntervalId);
-      delete messageElement.loadingIntervalId;
-    }
-    if (markdownContainer) {
-      let currentMdContent = messageElement.getAttribute("data-md-content") || "";
-      const fullMdContent = currentMdContent + newContent;
-      messageElement.setAttribute("data-md-content", fullMdContent);
-      markdownContainer.innerHTML = "";
-      await import_obsidian.MarkdownRenderer.render(this.app, fullMdContent, markdownContainer, "", this);
-    } else if (pElement) {
-      pElement.innerHTML += newContent;
-    }
-    const messageContainer = this.panel.querySelector(".ai-message-container");
-    if (messageContainer) {
-      messageContainer.scrollTop = messageContainer.scrollHeight;
-    }
-  }
-  updateSessionId(sessionId) {
-    const sessionIdElement = this.panel.querySelector(".ai-session-id");
-    if (sessionIdElement) {
-      sessionIdElement.textContent = `\u4F1A\u8BDDID\uFF1A${sessionId}`;
-    }
-  }
-  addSessionSeparator() {
-    const messageContainer = this.panel.querySelector(".ai-message-container");
-    if (messageContainer) {
-      const children = Array.from(messageContainer.children);
-      const lastChild = children[children.length - 1];
-      if (lastChild && lastChild.classList.contains("ai-message")) {
-        const separator = document.createElement("div");
-        separator.className = "ai-message-separator";
-        messageContainer.appendChild(separator);
-      }
-    }
-  }
-};
+var import_obsidian2 = require("obsidian");
 
 // ts/settings.ts
-var import_obsidian2 = require("obsidian");
+var import_obsidian = require("obsidian");
 var DEFAULT_SETTINGS = {
   historyFolder: "_Root/plugin/Task-AI/history",
   promptsFolder: "_Root/plugin/Task-AI/prompts",
   defaultPromptFile: "_Root/plugin/Task-AI/prompts/default.md",
-  taskCollectionsFolder: "Task-AI \u4EFB\u52A1\u96C6",
+  taskCollectionsFolder: "Task Box",
   deepseekApiKey: "",
   deepseekModel: "deepseek-reasoner",
   isFlomoEnabled: false,
@@ -259,57 +52,64 @@ var DEFAULT_SETTINGS = {
 	4. \u4EE5\u65E0\u5E8F\u5217\u8868\u5F62\u5F0F\u6807\u660E\u4EE5\u4E0A\u6240\u6709\u4FE1\u606F\u7684\u6765\u6E90\u6587\u4EF6`,
   timedQueries: []
 };
-var TaskAISettingsTab = class extends import_obsidian2.PluginSettingTab {
+var TaskAISettingsTab = class extends import_obsidian.PluginSettingTab {
   constructor(app, plugin) {
     super(app, plugin);
     this.plugin = plugin;
     this.icon = "robot";
   }
-  display() {
+  async display() {
     const { containerEl } = this;
     containerEl.empty();
     const tabsContainer = containerEl.createEl("div", { cls: "setting-tabs" });
-    const fileTab = tabsContainer.createEl("div", { cls: "setting-tab active", text: "\u6587\u4EF6\u8BBE\u7F6E" });
-    const aiTab = tabsContainer.createEl("div", { cls: "setting-tab", text: "API \u8BBE\u7F6E" });
-    const triggerTab = tabsContainer.createEl("div", { cls: "setting-tab", text: "\u89E6\u53D1\u5F0F\u751F\u6210" });
-    const aboutTab = tabsContainer.createEl("div", { cls: "setting-tab", text: "\u5173\u4E8E" });
+    const fileTab = tabsContainer.createEl("div", { cls: "setting-tab active", text: "Files" });
+    const aiTab = tabsContainer.createEl("div", { cls: "setting-tab", text: "API" });
+    const triggerTab = tabsContainer.createEl("div", { cls: "setting-tab", text: "Trigger" });
     const fileSettingsContent = containerEl.createEl("div", { cls: "setting-tab-content active" });
-    new import_obsidian2.Setting(fileSettingsContent).setName("\u5386\u53F2\u6D88\u606F\u76EE\u5F55").addText((text) => text.setPlaceholder(DEFAULT_SETTINGS.historyFolder).setValue(this.plugin.settings.historyFolder).onChange(async (value) => {
-      this.plugin.settings.historyFolder = value;
-      await this.plugin.saveData(this.plugin.settings);
-    }));
-    new import_obsidian2.Setting(fileSettingsContent).setName("\u63D0\u793A\u8BCD\u6587\u4EF6\u76EE\u5F55").addText((text) => text.setPlaceholder(DEFAULT_SETTINGS.promptsFolder).setValue(this.plugin.settings.promptsFolder).onChange(async (value) => {
+    new import_obsidian.Setting(fileSettingsContent).setName("Prompts Directory").addButton((button) => button.setIcon("rotate-cw").onClick(async () => {
+      this.plugin.settings.promptsFolder = DEFAULT_SETTINGS.promptsFolder;
+      this.plugin.saveData(this.plugin.settings);
+      new import_obsidian.Notice("RESET", 1e3);
+      this.display();
+    })).addText((text) => text.setPlaceholder(DEFAULT_SETTINGS.promptsFolder).setValue(this.plugin.settings.promptsFolder).onChange(async (value) => {
       this.plugin.settings.promptsFolder = value;
       await this.plugin.saveData(this.plugin.settings);
     }));
-    new import_obsidian2.Setting(fileSettingsContent).setName("\u9ED8\u8BA4\u95EE\u8BE2\u63D0\u793A\u8BCD").addText((text) => text.setPlaceholder(DEFAULT_SETTINGS.defaultPromptFile).setValue(this.plugin.settings.defaultPromptFile).onChange(async (value) => {
-      this.plugin.settings.defaultPromptFile = value;
-      await this.plugin.saveData(this.plugin.settings);
-    }));
-    new import_obsidian2.Setting(fileSettingsContent).setName("\u4EFB\u52A1\u96C6\u76EE\u5F55").addText((text) => text.setPlaceholder(DEFAULT_SETTINGS.taskCollectionsFolder).setValue(this.plugin.settings.taskCollectionsFolder).onChange(async (value) => {
+    new import_obsidian.Setting(fileSettingsContent).setName("Task Box Directory").setDesc(`Only files in this directory will be send to AI . Will Create if it does not exist.`).addButton((button) => button.setIcon("rotate-cw").onClick(async () => {
+      this.plugin.settings.taskCollectionsFolder = DEFAULT_SETTINGS.taskCollectionsFolder;
+      this.plugin.saveData(this.plugin.settings);
+      new import_obsidian.Notice("RESET", 1e3);
+      this.display();
+    })).addText((text) => text.setPlaceholder(DEFAULT_SETTINGS.taskCollectionsFolder).setValue(this.plugin.settings.taskCollectionsFolder).onChange(async (value) => {
       this.plugin.settings.taskCollectionsFolder = value;
       await this.plugin.saveData(this.plugin.settings);
     }));
     const aiSettingsContent = containerEl.createEl("div", { cls: "setting-tab-content" });
-    new import_obsidian2.Setting(aiSettingsContent).setName("Deepseek API Key").setDesc("\u60A8\u7684 Deepseek API \u5BC6\u94A5").addText((text) => text.setPlaceholder("sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx").setValue(this.plugin.settings.deepseekApiKey).onChange(async (value) => {
+    const aiSettingsContentText1 = "Deepseek API Key";
+    const aiSettingsContentText3 = "sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
+    new import_obsidian.Setting(aiSettingsContent).setName(aiSettingsContentText1).addText((text) => text.setPlaceholder(aiSettingsContentText3).setValue(this.plugin.settings.deepseekApiKey).onChange(async (value) => {
       this.plugin.settings.deepseekApiKey = value;
       await this.plugin.saveData(this.plugin.settings);
     }));
-    new import_obsidian2.Setting(aiSettingsContent).setName("\u542F\u7528 Flomo \u96C6\u6210").setDesc("\u542F\u7528\u540E\uFF0C\u89E6\u53D1\u5F0F\u751F\u6210\u7684\u7ED3\u679C\u5C06\u53D1\u9001\u5230 Flomo").addToggle((toggle) => toggle.setValue(this.plugin.settings.isFlomoEnabled).onChange(async (value) => {
+    const aiSettingsContentText4 = "Enable Flomo Integration";
+    new import_obsidian.Setting(aiSettingsContent).setName(aiSettingsContentText4).addToggle((toggle) => toggle.setValue(this.plugin.settings.isFlomoEnabled).onChange(async (value) => {
       this.plugin.settings.isFlomoEnabled = value;
       await this.plugin.saveData(this.plugin.settings);
     }));
-    new import_obsidian2.Setting(aiSettingsContent).setName("Flomo \u4E13\u5C5E\u8BB0\u5F55 API URL").setDesc("\u60A8\u7684 Flomo \u4E13\u5C5E\u8BB0\u5F55 API \u94FE\u63A5\uFF0C\u53EF\u5728 Flomo \u8BBE\u7F6E - API \u4E2D\u83B7\u53D6").addText((text) => text.setPlaceholder("https://flomoapp.com/iwh/xxxxxxxxxxxxxxxxxxxx").setValue(this.plugin.settings.flomoApiKey).onChange(async (value) => {
+    const aiSettingsContentText6 = "Flomo API URL";
+    const aiSettingsContentText7 = "Flomo Settings -> API";
+    const aiSettingsContentText8 = "https://flomoapp.com/iwh/xxxxxxxxxxxxxxxxxxxx";
+    new import_obsidian.Setting(aiSettingsContent).setName(aiSettingsContentText6).setDesc(aiSettingsContentText7).addText((text) => text.setPlaceholder(aiSettingsContentText8).setValue(this.plugin.settings.flomoApiKey).onChange(async (value) => {
       this.plugin.settings.flomoApiKey = value;
       await this.plugin.saveData(this.plugin.settings);
     }));
     const triggerSettingsContent = containerEl.createEl("div", { cls: "setting-tab-content task-ai-trigger-settings-content" });
-    new import_obsidian2.Setting(triggerSettingsContent).setName("\u542F\u7528\u89E6\u53D1\u751F\u6210").setDesc("\u542F\u7528\u540E\u63D2\u4EF6\u4F9D\u7167\u4EFB\u52A1\u8868\u89E6\u53D1\u751F\u6210").addToggle((toggle) => toggle.setValue(this.plugin.settings.isTimedTaskEnabled).onChange(async (value) => {
+    new import_obsidian.Setting(triggerSettingsContent).setName("Enable Timed Task").addToggle((toggle) => toggle.setValue(this.plugin.settings.isTimedTaskEnabled).onChange(async (value) => {
       this.plugin.settings.isTimedTaskEnabled = value;
       await this.plugin.saveData(this.plugin.settings);
       this.app.workspace.trigger("taskai:update-timed-task", value);
     }));
-    new import_obsidian2.Setting(triggerSettingsContent).setName("\u89E6\u53D1\u95F4\u9694\uFF08\u5206\u949F\uFF09").setDesc("\u63D2\u4EF6\u89E6\u53D1\u751F\u6210\u7684\u95F4\u9694").addText((text) => text.setValue(this.plugin.settings.timedTaskInterval.toString()).onChange(async (value) => {
+    new import_obsidian.Setting(triggerSettingsContent).setName("Timed Task Interval (minutes)").addText((text) => text.setValue(this.plugin.settings.timedTaskInterval.toString()).onChange(async (value) => {
       const interval = parseInt(value);
       if (!isNaN(interval) && interval > 0) {
         this.plugin.settings.timedTaskInterval = interval;
@@ -318,29 +118,33 @@ var TaskAISettingsTab = class extends import_obsidian2.PluginSettingTab {
       }
     }));
     triggerSettingsContent.createEl("div", { cls: "setting-section-divider" });
-    triggerSettingsContent.createEl("h4", { text: "\u89E6\u53D1\u5F0F\u751F\u6210\u8BBE\u7F6E" });
+    new import_obsidian.Setting(triggerSettingsContent).setName("Rules").setHeading();
     const tableContainer = triggerSettingsContent.createEl("div", { cls: "timed-queries-table-container" });
     const table = tableContainer.createEl("table", { cls: "timed-queries-table" });
     const thead = table.createEl("thead");
     const headerRow = thead.createEl("tr");
-    headerRow.createEl("th", { text: "\u65F6\u95F4", cls: "timed-queries-column" });
-    headerRow.createEl("th", { text: "\u63D0\u793A\u8BCD", cls: "timed-queries-column" });
-    headerRow.createEl("th", { text: "\u8F93\u5165\u65F6\u95F4", cls: "timed-queries-column" });
-    headerRow.createEl("th", { text: "\u8F93\u5165\u4EFB\u52A1", cls: "timed-queries-column" });
-    headerRow.createEl("th", { text: "\u542F\u7528\u89C4\u5219", cls: "timed-queries-column" });
-    headerRow.createEl("th", { text: "\u64CD\u4F5C", cls: "timed-queries-column" });
+    headerRow.createEl("th", { text: "Time", cls: "timed-queries-column" });
+    headerRow.createEl("th", { text: "Prompt", cls: "timed-queries-column" });
+    headerRow.createEl("th", { text: "Input Time", cls: "timed-queries-column" });
+    headerRow.createEl("th", { text: "Input Task", cls: "timed-queries-column" });
+    headerRow.createEl("th", { text: "Enable Rule", cls: "timed-queries-column" });
+    headerRow.createEl("th", { text: "Action", cls: "timed-queries-column" });
     const tbody = table.createEl("tbody", { cls: "timed-queries-table-body" });
     const renderTimedQueries = async () => {
       tbody.empty();
-      const promptFiles = await this.app.vault.adapter.list(this.plugin.settings.promptsFolder);
-      const mdFiles = promptFiles.files.filter((file) => file.endsWith(".md")).map((file) => `${this.plugin.settings.promptsFolder}/${file}`);
+      let mdFiles = [];
+      try {
+        const promptFiles = await this.app.vault.adapter.list(this.plugin.settings.promptsFolder);
+        mdFiles = promptFiles.files.filter((file) => file.endsWith(".md")).map((file) => `${this.plugin.settings.promptsFolder}/${file}`);
+      } catch (error) {
+      }
       this.plugin.settings.timedQueries.forEach((query, index) => {
         const row = tbody.createEl("tr", { cls: "timed-queries-row" });
         const timeCell = row.createEl("td", { cls: "timed-queries-cell" });
         const timeInput = timeCell.createEl("input", { type: "time", value: query.time, cls: "timed-queries-input" });
         timeInput.addEventListener("change", async () => {
           this.plugin.settings.timedQueries[index].time = timeInput.value;
-          await this.plugin.saveData(this.plugin.settings);
+          this.plugin.saveData(this.plugin.settings);
           this.app.workspace.trigger("taskai:update-timed-queries");
         });
         const promptCell = row.createEl("td", { cls: "timed-queries-cell" });
@@ -358,7 +162,7 @@ var TaskAISettingsTab = class extends import_obsidian2.PluginSettingTab {
         });
         promptSelect.addEventListener("change", async () => {
           this.plugin.settings.timedQueries[index].promptFile = promptSelect.value;
-          await this.plugin.saveData(this.plugin.settings);
+          this.plugin.saveData(this.plugin.settings);
           this.app.workspace.trigger("taskai:update-timed-queries");
         });
         const includeTimeCell = row.createEl("td", { cls: "timed-queries-cell" });
@@ -366,7 +170,7 @@ var TaskAISettingsTab = class extends import_obsidian2.PluginSettingTab {
         includeTimeToggle.checked = query.includeCurrentTime;
         includeTimeToggle.addEventListener("change", async () => {
           this.plugin.settings.timedQueries[index].includeCurrentTime = includeTimeToggle.checked;
-          await this.plugin.saveData(this.plugin.settings);
+          this.plugin.saveData(this.plugin.settings);
           this.app.workspace.trigger("taskai:update-timed-queries");
         });
         const includeTaskInfoCell = row.createEl("td", { cls: "timed-queries-cell" });
@@ -374,7 +178,7 @@ var TaskAISettingsTab = class extends import_obsidian2.PluginSettingTab {
         includeTaskInfoToggle.checked = query.includeTaskInfo;
         includeTaskInfoToggle.addEventListener("change", async () => {
           this.plugin.settings.timedQueries[index].includeTaskInfo = includeTaskInfoToggle.checked;
-          await this.plugin.saveData(this.plugin.settings);
+          this.plugin.saveData(this.plugin.settings);
           this.app.workspace.trigger("taskai:update-timed-queries");
         });
         const enabledCell = row.createEl("td", { cls: "timed-queries-cell" });
@@ -382,26 +186,30 @@ var TaskAISettingsTab = class extends import_obsidian2.PluginSettingTab {
         enabledToggle.checked = query.enabled;
         enabledToggle.addEventListener("change", async () => {
           this.plugin.settings.timedQueries[index].enabled = enabledToggle.checked;
-          await this.plugin.saveData(this.plugin.settings);
+          this.plugin.saveData(this.plugin.settings);
           this.app.workspace.trigger("taskai:update-timed-queries");
         });
         const actionCell = row.createEl("td", { cls: "timed-queries-cell" });
-        const testButton = actionCell.createEl("button", { text: "\u89E6\u53D1", cls: "timed-queries-test-button" });
+        const testButton = actionCell.createEl("button", { cls: "timed-queries-test-button" });
+        testButton.createEl("span", { cls: "obsidian-icon", text: "\u25B6" });
+        testButton.setAttribute("aria-label", "Try executing the rule");
         testButton.addEventListener("click", async () => {
-          new import_obsidian2.Notice("\u89C4\u5219\u5F00\u59CB\u6267\u884C");
-          await this.plugin.executeTimedQuery(query);
-          new import_obsidian2.Notice("\u89C4\u5219\u5DF2\u88AB\u6267\u884C");
+          new import_obsidian.Notice("Start execution of timed query.");
+          this.plugin.executeTimedQuery(query);
+          new import_obsidian.Notice("Rules have been executed.");
         });
-        const deleteButton = actionCell.createEl("button", { text: "\u5220\u9664", cls: "timed-queries-delete-button" });
+        const deleteButton = actionCell.createEl("button", { cls: "timed-queries-delete-button" });
+        deleteButton.createEl("span", { cls: "obsidian-icon", text: "\u232B" });
+        deleteButton.setAttribute("aria-label", "Delete this rule");
         deleteButton.addEventListener("click", async () => {
           this.plugin.settings.timedQueries.splice(index, 1);
-          await this.plugin.saveData(this.plugin.settings);
-          renderTimedQueries();
+          this.plugin.saveData(this.plugin.settings);
+          await renderTimedQueries();
           this.app.workspace.trigger("taskai:update-timed-queries");
         });
       });
     };
-    new import_obsidian2.Setting(triggerSettingsContent).addButton((button) => button.setButtonText("\u6DFB\u52A0\u65B0\u7684\u89E6\u53D1\u5F0F\u751F\u6210").setCta().onClick(async () => {
+    new import_obsidian.Setting(triggerSettingsContent).addButton((button) => button.setButtonText("Add New Timed Task").setCta().onClick(async () => {
       this.plugin.settings.timedQueries.push({
         time: "09:00",
         promptFile: "__default__",
@@ -411,32 +219,28 @@ var TaskAISettingsTab = class extends import_obsidian2.PluginSettingTab {
         includeTaskInfo: true
       });
       await this.plugin.saveData(this.plugin.settings);
-      renderTimedQueries();
+      await renderTimedQueries();
       this.app.workspace.trigger("taskai:update-timed-queries");
     }));
-    triggerSettingsContent.createEl("h4", { text: "\u89E6\u53D1\u5F0F\u751F\u6210\u63D0\u793A\u8BCD" });
-    new import_obsidian2.Setting(triggerSettingsContent).addTextArea((textArea) => {
+    new import_obsidian.Setting(triggerSettingsContent).setName("Timed Task Default Prompt").setHeading();
+    new import_obsidian.Setting(triggerSettingsContent).addTextArea((textArea) => {
       textArea.setValue(this.plugin.settings.triggerPrompt).onChange(async (value) => {
         this.plugin.settings.triggerPrompt = value;
         await this.plugin.saveData(this.plugin.settings);
-      }).setPlaceholder("\u8BF7\u8F93\u5165\u63D0\u793A\u8BCD...");
+      }).setPlaceholder("Enter your timed task prompt here...");
       textArea.inputEl.classList.add("task-ai-default-prompt");
     });
-    renderTimedQueries();
-    const aboutSettingsContent = containerEl.createEl("div", { cls: "setting-tab-content" });
-    aboutSettingsContent.createEl("h3", { text: "\u5173\u4E8E Task AI" });
-    aboutSettingsContent.createEl("p", { text: "Task AI \u63D2\u4EF6\u662F\u4E3A\u4E86\u6574\u5408\u6211\u6240\u8981\u505A\u7684\u4E8B\u9879\u6240\u5F00\u53D1\u7684\u81EA\u7528\u63D2\u4EF6\uFF0C\u4E00\u4E9B\u64CD\u4F5C\u7684\u8BBE\u8BA1\u4F1A\u66F4\u8D34\u5408\u6211\u7684\u4E60\u60EF\uFF0C\u5F71\u54CD\u6700\u5927\u7684\u53EF\u80FD\u662F\u8FD9\u4E2A\u63D2\u4EF6\u6682\u65F6\u53EA\u4F7F\u7528 Deepseek \u7684\u89E3\u91CA\u6A21\u578B\u8FDB\u884C\u4EA4\u4E92\uFF0C\u540E\u7EED\u53EF\u80FD\u4F1A\u8003\u8651\u52A0\u5165\u5176\u4ED6\u6A21\u578B\u3002\u6211\u4F1A\u6301\u7EED\u6839\u636E\u6211\u81EA\u8EAB\u7684\u9700\u6C42\u8FDB\u884C\u4F18\u5316\uFF0C\u5982\u679C\u65F6\u95F4\u5145\u88D5\uFF0C\u6211\u4F1A\u6839\u636E\u793E\u533A\u53CD\u9988\u8FDB\u884C\u8C03\u6574\u3002" });
-    aboutSettingsContent.createEl("p", { text: "\u8FD9\u4E2A\u63D2\u4EF6\u7684\u8BBE\u8BA1\u76EE\u7684\u662F\uFF1A\u9488\u5BF9\u6211\u8FD9\u6837\u4E0D\u4E60\u60EF\u4F7F\u7528\u7C7B\u4F3C Task \u90A3\u6837\u4E25\u683C\u5B9A\u4E49\u7684\u8BED\u6CD5\u7684\u4EBA\uFF0C\u901A\u8FC7\u6574\u5408 AI \u6DF1\u5EA6\u601D\u8003\uFF0C\u4EE5\u81EA\u52A8\u5316\u7684\u5217\u4E3E\u6BCF\u65E5\u9700\u5B8C\u6210\u7684\u4E8B\u9879\u3002" });
-    aboutSettingsContent.createEl("h3", { text: "\u5165\u95E8\u6559\u7A0B" });
-    aboutSettingsContent.createEl("p", { text: "\u5728\u4F7F\u7528\u6240\u6709\u529F\u80FD\u524D\uFF0C\u4F60\u9700\u8981\u6CE8\u518C\u4E00\u4E2A Deepseek \u5F00\u653E\u5E73\u53F0\u8D26\u53F7\uFF0C\u83B7\u53D6\u5230 API Key\uFF0C\u5E76\u5145\u503C\u4E00\u5B9A\u7684\u91D1\u989D\u3002" });
-    aboutSettingsContent.createEl("p", { text: "\u5176\u6B21\uFF0C\u4F60\u9700\u8981\u6253\u5F00\u6838\u5FC3\u63D2\u4EF6\u65E5\u8BB0\uFF0C\u4EE5\u4F9B\u89E6\u53D1\u5F0F\u751F\u6210\u5199\u51FA\u7ED3\u679C\u3002" });
-    aboutSettingsContent.createEl("p", { text: "\u4E3B\u8981\u529F\u80FD\uFF1A\u89E6\u53D1\u5F0F\u751F\u6210\u3002\u6B64\u529F\u80FD\u53EF\u4EE5\u6839\u636E\u4F60\u8BBE\u7F6E\u7684\u5B9A\u65F6\u4EFB\u52A1\uFF0C\u81EA\u52A8\u8BFB\u53D6\u4EFB\u52A1\u96C6\u6587\u4EF6\u5939\u53D1\u9001\u5411 AI \u8BA9\u5176\u8FDB\u884C\u4EFB\u52A1\u6574\u5408\uFF0C\u5C06\u7ED3\u679C\u5199\u5165\u5F53\u5929\u7684\u65E5\u8BB0\u6587\u4EF6\u4E2D\u3002" });
-    aboutSettingsContent.createEl("p", { text: "\u6B64\u5916\uFF0C\u5982\u679C\u4F60\u62E5\u6709 flomo \u5E73\u53F0\u4F1A\u5458\uFF0C\u4F60\u53EF\u4EE5\u5728\u63D2\u4EF6\u8BBE\u7F6E\u4E2D\u914D\u7F6E flomo API \uFF0C\u4F7F\u63D2\u4EF6\u5728\u89E6\u53D1\u5F0F\u751F\u6210\u540E\uFF0C\u81EA\u52A8\u5C06\u7ED3\u679C\u53D1\u9001\u5230 flomo \u5E73\u53F0\uFF0C\u65B9\u4FBF\u4F60\u5728\u624B\u673A\u7AEF\u67E5\u770B\u3002" });
-    aboutSettingsContent.createEl("p", { text: "\u8F85\u52A9\u529F\u80FD\uFF1A\u6301\u7EED\u6027\u5BF9\u8BDD\u4E0E\u4EE5\u65F6\u95F4\u6233\u5F62\u5F0F\u4FDD\u5B58\u5BF9\u8BDD\u8BB0\u5F55\uFF0C\u901A\u8FC7\u6307\u4EE4\u5F00\u542F\u53D1\u9001\u6D88\u606F\u7684\u6A21\u6001\u6846\uFF0C\u4EE5\u9009\u5B9A\u7684\u63D0\u793A\u8BCD\u6587\u4EF6\u5411AI\u8FDB\u884C\u6301\u7EED\u8BE2\u95EE\u3002" });
-    aboutSettingsContent.createEl("h3", { text: "\u66F4\u65B0\u65E5\u5FD7" });
-    aboutSettingsContent.createEl("p", { text: "v1.0.0: \u5B8C\u6210\u4E24\u9879\u57FA\u672C\u529F\u80FD\u642D\u5EFA\uFF0C\u5305\u62EC\u81EA\u5B9A\u4E49\u63D0\u793A\u8BCD\u7684\u6301\u7EED\u6027\u5BF9\u8BDD\u4E0E\u4FDD\u5B58\u3001\u81EA\u5B9A\u4E49\u63D0\u793A\u8BCD\u7684\u5B9A\u65F6\u4EFB\u52A1\u6574\u5408\u3001\u5B8C\u6210\u5B9A\u65F6\u4EFB\u52A1\u540E\u81EA\u52A8\u5316\u7684\u53D1\u9001\u5411 flomo \u5E73\u53F0\u4EE5\u65B9\u4FBF\u624B\u673A\u7AEF\u67E5\u9605\u3002" });
-    const tabs = [fileTab, aiTab, triggerTab, aboutTab];
-    const tabContents = [fileSettingsContent, aiSettingsContent, triggerSettingsContent, aboutSettingsContent];
+    new import_obsidian.Setting(triggerSettingsContent).addButton(
+      (button) => button.setIcon("rotate-cw").onClick(async () => {
+        this.plugin.settings.triggerPrompt = DEFAULT_SETTINGS.triggerPrompt;
+        this.plugin.saveData(this.plugin.settings);
+        this.display();
+        new import_obsidian.Notice("RESET", 1e3);
+      })
+    );
+    await renderTimedQueries();
+    const tabs = [fileTab, aiTab, triggerTab];
+    const tabContents = [fileSettingsContent, aiSettingsContent, triggerSettingsContent];
     tabs.forEach((tab, index) => {
       tab.addEventListener("click", () => {
         tabs.forEach((t) => t.classList.remove("active"));
@@ -449,7 +253,7 @@ var TaskAISettingsTab = class extends import_obsidian2.PluginSettingTab {
 };
 
 // ts/main.ts
-var TaskAI = class extends import_obsidian3.Plugin {
+var TaskAI = class extends import_obsidian2.Plugin {
   constructor() {
     super(...arguments);
     this.currentSessionId = this.generateSessionId();
@@ -460,69 +264,6 @@ var TaskAI = class extends import_obsidian3.Plugin {
     this.timedTaskTimer = null;
     this.lastCheckedMinute = -1;
     this.statusBarItem = null;
-    this.QueryModal = class extends import_obsidian3.Modal {
-      constructor(app, prompts, defaultPrompt, historyFolder, sessionId, onSubmit) {
-        super(app);
-        this.prompts = prompts;
-        this.setTitle("\u8BE2\u95EE Deepseek");
-        this.defaultPrompt = defaultPrompt;
-        this.historyFolder = historyFolder;
-        this.sessionId = sessionId;
-        this.onSubmit = onSubmit;
-      }
-      onOpen() {
-        const { contentEl } = this;
-        const inputDiv = contentEl.createEl("div", { cls: "ai-query-modal-input" });
-        const input = inputDiv.createEl("textarea", {
-          placeholder: "\u8F93\u5165\u95EE\u9898",
-          attr: { rows: "5" },
-          cls: "ai-query-modal-textarea"
-        });
-        const selectDiv = contentEl.createEl("div", { cls: "ai-query-modal-select" });
-        const selectLabel = selectDiv.createEl("label", { text: "\u9009\u62E9\u63D0\u793A\u8BCD:" });
-        const select = selectDiv.createEl("select", { cls: "ai-query-modal-select-dropdown" });
-        this.prompts.forEach((file) => {
-          const filename = file.split("/").pop();
-          const option = select.createEl("option", { text: filename, value: file });
-          if (file === this.defaultPrompt) {
-            option.selected = true;
-          }
-        });
-        const historyInfo = contentEl.createEl("div", { cls: "ai-query-modal-history-info" });
-        historyInfo.textContent = `\u5386\u53F2\u8BB0\u5F55\u5C06\u4FDD\u5B58\u5230: ${this.historyFolder}/task-ai-${this.sessionId}.md`;
-        const buttonContainer = contentEl.createEl("div", { cls: "ai-query-modal-buttons" });
-        const fastInfo = buttonContainer.createEl("span", { cls: "ai-query-modal-fast-info" });
-        fastInfo.textContent = `\u8F93\u5165\u6846\u5185\u6309\u4E0B Ctrl + Enter \u4EE5\u5FEB\u901F\u53D1\u9001`;
-        const cancelButton = buttonContainer.createEl("button", {
-          text: "\u53D6\u6D88",
-          cls: "ai-query-modal-button cancel"
-        });
-        cancelButton.addEventListener("click", () => this.close());
-        const sendButton = buttonContainer.createEl("button", {
-          text: "\u53D1\u9001",
-          cls: "ai-query-modal-button send"
-        });
-        input.addEventListener("keydown", (event) => {
-          if (event.ctrlKey && event.key === "Enter") {
-            sendButton.click();
-          }
-        });
-        sendButton.addEventListener("click", () => {
-          const userInput = input.value.trim();
-          const selectedPrompt = select.value;
-          if (userInput) {
-            this.onSubmit(userInput, selectedPrompt);
-            this.close();
-          } else {
-            new import_obsidian3.Notice("\u4F60\u8F93\u5165\u7684\u95EE\u9898\u4E0D\u80FD\u4E3A\u7A7A\u3002");
-          }
-        });
-      }
-      onClose() {
-        const { contentEl } = this;
-        contentEl.empty();
-      }
-    };
     this.settings = DEFAULT_SETTINGS;
   }
   generateSessionId() {
@@ -530,7 +271,7 @@ var TaskAI = class extends import_obsidian3.Plugin {
   }
   async startNewSession() {
     if (this.isSendingMessage) {
-      new import_obsidian3.Notice("\u6D88\u606F\u53D1\u9001\u4E2D\uFF0C\u65E0\u6CD5\u5F00\u542F\u65B0\u4F1A\u8BDD");
+      new import_obsidian2.Notice("Sending Message Forward. Please wait.");
       return;
     }
     this.currentSessionId = this.generateSessionId();
@@ -545,83 +286,36 @@ var TaskAI = class extends import_obsidian3.Plugin {
       await this.app.vault.adapter.write(historyFilePath, initialContent);
     } catch (error) {
       console.error("Error creating history file:", error);
-      new import_obsidian3.Notice("\u521B\u5EFA\u4F1A\u8BDD\u5386\u53F2\u6587\u4EF6\u5931\u8D25");
+      new import_obsidian2.Notice("Failed to create session history file.");
     }
-    new import_obsidian3.Notice("\u5DF2\u5F00\u59CB\u65B0\u4F1A\u8BDD");
-    const leaves = this.app.workspace.getLeavesOfType(VIEW_TYPE_AI_MESSAGE);
-    leaves.forEach((leaf) => {
-      const view = leaf.view;
-      if (view instanceof AI_Message_Panel) {
-        view.updateSessionId(this.currentSessionId);
-        view.addSessionSeparator();
-      }
-    });
+    new import_obsidian2.Notice("New session started.");
   }
   async onload() {
     this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
     this.addSettingTab(new TaskAISettingsTab(this.app, this));
     this.initTimedTask();
-    this.app.workspace.on("taskai:update-timed-task", (enabled) => {
-      if (enabled) {
-        this.startTimedTask();
-      } else {
-        this.stopTimedTask();
-      }
-    });
-    this.app.workspace.on("taskai:update-timed-interval", (interval) => {
+    this.registerEvent(this.app.vault.on("create", () => {
+      window.setInterval(() => this.checkTimedTasks(), this.settings.timedTaskInterval * 60 * 1e3);
+    }));
+    this.registerEvent(this.app.vault.on("create", () => {
       if (this.settings.isTimedTaskEnabled) {
         this.stopTimedTask();
         this.startTimedTask();
       }
-    });
-    this.app.workspace.on("taskai:update-timed-queries", () => {
-      this.updateStatusBar();
-    });
+    }));
+    this.registerEvent(this.app.vault.on("create", () => {
+      window.setInterval(() => this.updateStatusBar(), 500);
+    }));
     this.app.workspace.onLayoutReady(async () => {
       let structureCreated = false;
-      console.log(`[TaskAI] Starting structure creation...`);
-      const created2 = await this.createFolder(this.settings.historyFolder);
-      structureCreated = structureCreated || created2;
-      console.log(`[TaskAI] Created history folder: ${created2}, structureCreated: ${structureCreated}`);
-      const created3 = await this.createFolder(this.settings.promptsFolder);
-      structureCreated = structureCreated || created3;
-      console.log(`[TaskAI] Created prompts folder: ${created3}, structureCreated: ${structureCreated}`);
-      const created4 = await this.createDefaultPromptFile();
-      structureCreated = structureCreated || created4;
-      console.log(`[TaskAI] Created file: ${created4}, structureCreated: ${structureCreated}`);
       const created5 = await this.createFolder(this.settings.taskCollectionsFolder);
       structureCreated = structureCreated || created5;
-      console.log(`[TaskAI] Created task collections folder: ${created5}, structureCreated: ${structureCreated}`);
-      console.log(`[TaskAI] Final structureCreated: ${structureCreated}`);
       if (structureCreated) {
         setTimeout(() => {
-          new import_obsidian3.Notice("Task AI \u6587\u4EF6\u7ED3\u6784\u5DF2\u521B\u5EFA\u5B8C\u6210");
+          new import_obsidian2.Notice("Task AI : Structure Created.");
         }, 500);
       } else {
-        console.log(`[TaskAI] No structure created, skipping notice`);
       }
-      await this.openAIMessagePanel();
-    });
-    this.registerView(
-      VIEW_TYPE_AI_MESSAGE,
-      (leaf) => new AI_Message_Panel(leaf)
-    );
-    this.addCommand({
-      id: "ai-message-panel-open",
-      name: "\u6253\u5F00 AI \u6D88\u606F\u9762\u677F",
-      callback: () => this.openAIMessagePanel()
-    });
-    this.addCommand({
-      id: "ai-message-send-query",
-      name: "\u8BE2\u95EE AI",
-      callback: () => this.showAIQueryDialog()
-    });
-    this.app.workspace.on("taskai:new-session", async () => {
-      await this.startNewSession();
-    });
-    this.app.workspace.on("taskai:panel-opened", (panel) => {
-      const messagePanel = panel;
-      messagePanel.updateSessionId(this.currentSessionId);
     });
     this.statusBarItem = this.addStatusBarItem();
     this.updateStatusBar();
@@ -654,232 +348,19 @@ var TaskAI = class extends import_obsidian3.Plugin {
     if (nextTime) {
       const hours = nextTime.getHours().toString().padStart(2, "0");
       const minutes = nextTime.getMinutes().toString().padStart(2, "0");
-      this.statusBarItem.setText(`Next AI Task: ${hours}:${minutes}`);
+      this.statusBarItem.setText(`Next: ${hours}:${minutes}`);
     } else {
       this.statusBarItem.setText("");
       this.statusBarItem.title = "";
     }
   }
-  async showAIQueryDialog() {
-    const promptFiles = await this.app.vault.adapter.list(this.settings.promptsFolder);
-    const mdFiles = promptFiles.files.filter((f) => f.endsWith(".md"));
-    const modal = new this.QueryModal(this.app, mdFiles, this.settings.defaultPromptFile, this.settings.historyFolder, this.currentSessionId, async (userInput, selectedPrompt) => {
-      try {
-        const promptContent = await this.app.vault.adapter.read(selectedPrompt);
-        const fullMessage = `${promptContent}
-
-\u7528\u6237\u95EE\u9898: ${userInput}
-\u4F1A\u8BDDID: ${this.currentSessionId}`;
-        await this.sendToDeepSeek(fullMessage, userInput, selectedPrompt);
-      } catch (error) {
-        console.error("Error in AI query process:", error);
-        new import_obsidian3.Notice("Failed to process AI query. Please check console for details.");
-      }
-    });
-    modal.open();
-  }
-  async replaceDoubleBracketsWithFileContent(input) {
-    const doubleBracketRegex = /\[\[(.*?)(?:\|.*?)?\]\]/g;
-    const matches = input.matchAll(doubleBracketRegex);
-    let result = input;
-    for (const match of matches) {
-      const fullMatch = match[0];
-      let linkText = match[1].trim();
-      let file = this.app.vault.getFiles().find((f) => f.path === linkText);
-      if (!file && !linkText.endsWith(".md")) {
-        file = this.app.vault.getFiles().find((f) => f.path === `${linkText}.md`);
-      }
-      if (!file) {
-        const fileName = linkText.split("/").pop() || linkText;
-        file = this.app.vault.getFiles().find((f) => f.name === fileName);
-        if (!file && !fileName.endsWith(".md")) {
-          file = this.app.vault.getFiles().find((f) => f.name === `${fileName}.md`);
-        }
-      }
-      if (file) {
-        try {
-          const content = await this.app.vault.adapter.read(file.path);
-          result = result.replace(fullMatch, content);
-        } catch (error) {
-          console.error(`Error reading file ${linkText}:`, error);
-        }
-      } else {
-        console.error(`File not found: ${linkText}`);
-      }
-    }
-    return result;
-  }
-  async sendToDeepSeek(prompt, userInput, selectedPrompt) {
-    var _a;
-    if (!this.settings.deepseekApiKey) {
-      new import_obsidian3.Notice("\u8BBE\u7F6E\u4F60\u7684 DeepSeek API Key \u4EE5\u4F7F\u7528\u6B64\u529F\u80FD\u3002");
-      return;
-    }
-    const processedPrompt = await this.replaceDoubleBracketsWithFileContent(prompt);
-    const processedUserInput = await this.replaceDoubleBracketsWithFileContent(userInput);
-    this.isSendingMessage = true;
-    const apiKey = this.settings.deepseekApiKey;
-    const model = this.settings.deepseekModel;
-    try {
-      let messages = this.sessionMessages.get(this.currentSessionId) || [];
-      if (messages.length === 0) {
-        messages.push({ role: "system", content: processedPrompt });
-      }
-      messages.push({ role: "user", content: processedUserInput });
-      const response = await fetch("https://api.deepseek.com/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${apiKey}`
-        },
-        body: JSON.stringify({
-          model,
-          messages,
-          temperature: 0.7,
-          top_p: 0.95,
-          stream: true
-        })
-      });
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(`API Error: ${response.status} - ${((_a = errorData.error) == null ? void 0 : _a.message) || "Unknown error"}`);
-      }
-      const aiResponse = await this.handleStreamResponse(response, userInput);
-      messages.push({ role: "assistant", content: aiResponse });
-      const historyFilePath = `${this.settings.historyFolder}/task-ai-${this.currentSessionId}.md`;
-      const promptFilename = selectedPrompt.split("/").pop() || "UnknownPrompt.md";
-      const contentToAppend = `
----
-## ${new Date().toISOString()}
-
-### \u4F7F\u7528\u7684\u63D0\u793A\u8BCD\u6587\u4EF6
-${promptFilename}
-
-### \u7528\u6237\u95EE\u9898
-${userInput}
-
-### AI\u56DE\u7B54
-${aiResponse}
-`;
-      try {
-        await this.app.vault.adapter.append(historyFilePath, contentToAppend);
-      } catch (error) {
-        console.error("Error appending to history file:", error);
-      }
-      new import_obsidian3.Notice("AI query completed");
-    } catch (error) {
-      console.error("Error sending to DeepSeek API:", error);
-      new import_obsidian3.Notice(`Failed to send query: ${error instanceof Error ? error.message : "Unknown error"}`);
-    } finally {
-      this.isSendingMessage = false;
-    }
-  }
-  async handleStreamResponse(response, userInput) {
-    var _a;
-    const reader = (_a = response.body) == null ? void 0 : _a.getReader();
-    if (!reader) {
-      throw new Error("No response body");
-    }
-    await this.addUserMessageToPanel(userInput);
-    const aiMessageElement = await this.createEmptyAIMessage();
-    if (!aiMessageElement) {
-      throw new Error("Could not create AI message element");
-    }
-    const decoder = new TextDecoder("utf-8");
-    let buffer = "";
-    let fullResponse = "";
-    try {
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) {
-          break;
-        }
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split("\n");
-        buffer = lines.pop() || "";
-        for (const line of lines) {
-          const trimmedLine = line.trim();
-          if (!trimmedLine)
-            continue;
-          if (trimmedLine.startsWith(":"))
-            continue;
-          const [event, data] = trimmedLine.split(": ", 2);
-          if (event !== "data" || data === "[DONE]")
-            continue;
-          try {
-            const jsonData = JSON.parse(data);
-            const content = jsonData.choices[0].delta.content || "";
-            if (content) {
-              await this.updateAIMessageElement(aiMessageElement, content);
-              fullResponse += content;
-            }
-          } catch (jsonError) {
-            console.error("Error parsing JSON data:", jsonError);
-          }
-        }
-      }
-    } finally {
-      reader.releaseLock();
-    }
-    return fullResponse;
-  }
-  async addUserMessageToPanel(userMessage) {
-    await this.openAIMessagePanel();
-    const leaves = this.app.workspace.getLeavesOfType(VIEW_TYPE_AI_MESSAGE);
-    if (leaves.length > 0) {
-      const leaf = leaves[0];
-      if (leaf.view instanceof AI_Message_Panel) {
-        leaf.view.addMessageToContainer(userMessage, "user");
-      }
-    }
-  }
-  async createEmptyAIMessage() {
-    await this.openAIMessagePanel();
-    const leaves = this.app.workspace.getLeavesOfType(VIEW_TYPE_AI_MESSAGE);
-    if (leaves.length > 0) {
-      const leaf = leaves[0];
-      if (leaf.view instanceof AI_Message_Panel) {
-        return leaf.view.createEmptyAIMessage();
-      }
-    }
-    return null;
-  }
-  async updateAIMessageElement(messageElement, content) {
-    const leaves = this.app.workspace.getLeavesOfType(VIEW_TYPE_AI_MESSAGE);
-    if (leaves.length > 0) {
-      const leaf = leaves[0];
-      if (leaf.view instanceof AI_Message_Panel) {
-        await leaf.view.updateMessageElement(messageElement, content);
-      }
-    }
-  }
-  async openAIMessagePanel() {
-    const existing = this.app.workspace.getLeavesOfType(VIEW_TYPE_AI_MESSAGE);
-    if (existing.length > 0) {
-      return;
-    }
-    const rightLeaf = this.app.workspace.getRightLeaf(false);
-    if (rightLeaf) {
-      await rightLeaf.setViewState({
-        type: VIEW_TYPE_AI_MESSAGE
-      });
-      const view = rightLeaf.view;
-      if (view instanceof AI_Message_Panel) {
-        view.updateSessionId(this.currentSessionId);
-      }
-    }
-  }
   onunload() {
-    this.app.workspace.detachLeavesOfType(VIEW_TYPE_AI_MESSAGE);
     this.stopTimedTask();
   }
   async createFolder(path) {
-    console.log(`[TaskAI] Checking folder: ${path}`);
     const exists = await this.app.vault.adapter.exists(path);
-    console.log(`[TaskAI] Folder ${path} exists: ${exists}`);
     if (!exists) {
       await this.app.vault.adapter.mkdir(path);
-      console.log(`[TaskAI] Created folder: ${path}`);
       return true;
     }
     return false;
@@ -889,12 +370,15 @@ ${aiResponse}
       this.startTimedTask();
     }
   }
-  startTimedTask() {
+  async startTimedTask() {
     this.stopTimedTask();
-    this.timedTaskTimer = setInterval(() => {
-      this.checkTimedTasks();
-    }, this.settings.timedTaskInterval * 60 * 1e3);
-    this.checkTimedTasks();
+    window.setInterval(
+      async () => await this.checkTimedTasks().catch((error) => {
+        console.error("Error in timed task:", error);
+      }),
+      this.settings.timedTaskInterval * 60 * 1e3
+    );
+    await this.checkTimedTasks();
   }
   stopTimedTask() {
     if (this.timedTaskTimer) {
@@ -921,11 +405,10 @@ ${aiResponse}
     this.updateStatusBar();
   }
   async executeTimedQuery(query) {
-    var _a, _b;
     if (this.isTriggerGenerating) {
       this.triggerQueue.push(query);
-      new import_obsidian3.Notice(`\u89E6\u53D1\u5F0F\u751F\u6210\u5DF2\u52A0\u5165\u7B49\u5F85\u961F\u5217: ${query.time}\u3002
-				\u6CE8\u610F: \u63D0\u793A\u8BCD\u4E0E\u4EFB\u52A1\u4FE1\u606F\u8D8A\u591A\uFF0C\u751F\u6210\u6240\u82B1\u8D39\u7684\u65F6\u95F4\u8D8A\u591A\uFF0C\u8BF7\u8010\u5FC3\u7B49\u5F85\u3002`);
+      new import_obsidian2.Notice(`Triggered generation added to queue: ${query.time}.
+Note: The more prompt and task information, the longer it will take to generate. Please be patient.`);
       return;
     }
     try {
@@ -936,25 +419,24 @@ ${aiResponse}
       } else {
         promptContent = await this.app.vault.adapter.read(query.promptFile);
       }
-      console.log(`[TaskAI] \u5F00\u59CB\u53D1\u9001\u4FE1\u606F\u5230 Deepseek `);
       const now = new Date();
       const today = now.toISOString().split("T")[0];
       let targetFilePath = query.targetFile.replace("{{today}}", today);
       if (targetFilePath === "{{systemDailyNote}}" || targetFilePath.startsWith("{{systemDailyNote}}/")) {
         try {
-          const dailyNotesPlugin = (_b = (_a = this.app.internalPlugins) == null ? void 0 : _a.plugins["daily-notes"]) == null ? void 0 : _b.instance;
-          if (dailyNotesPlugin) {
-            const settings = dailyNotesPlugin.settings;
-            const moment = window.moment;
-            const dailyNoteDate = moment().format(settings.format);
-            const dailyNotePath = `${settings.folder}/${dailyNoteDate}.md`;
+          const dailyNotesConfig = await this.getDailyNotesConfigFromFile();
+          const momentInstance = window.moment;
+          const format = dailyNotesConfig == null ? void 0 : dailyNotesConfig.format;
+          const folder = dailyNotesConfig == null ? void 0 : dailyNotesConfig.folder;
+          if (momentInstance && typeof momentInstance === "function" && typeof momentInstance().format === "function") {
+            const dailyNoteDate = momentInstance().format(format);
+            const dailyNotePath = `${folder}/${dailyNoteDate}.md`;
             if (targetFilePath === "{{systemDailyNote}}") {
               targetFilePath = dailyNotePath;
             } else {
               const suffix = targetFilePath.replace("{{systemDailyNote}}", "");
               targetFilePath = dailyNotePath + suffix;
             }
-            console.log(`\u4F7F\u7528\u7CFB\u7EDF\u65E5\u8BB0\u6587\u4EF6\u8DEF\u5F84: ${targetFilePath}`);
           }
         } catch (error) {
           console.error("\u83B7\u53D6\u7CFB\u7EDF\u65E5\u8BB0\u6587\u4EF6\u8DEF\u5F84\u5931\u8D25:", error);
@@ -967,7 +449,6 @@ ${aiResponse}
       if (await this.app.vault.adapter.exists(targetFilePath)) {
         targetFileContent = await this.app.vault.adapter.read(targetFilePath);
       }
-      console.log(`[TaskAI] \u5373\u5C06\u5199\u5165\u6587\u4EF6: ${targetFileContent}`);
       let additionalContent = "";
       if (query.includeCurrentTime) {
         const now2 = new Date();
@@ -1002,22 +483,22 @@ ${content}`;
         aiResponse += chunk;
       }
       if (this.settings.isFlomoEnabled && this.settings.flomoApiKey) {
-        this.sendToFlomo(aiResponse);
+        await this.sendToFlomo(aiResponse);
       }
-      new import_obsidian3.Notice(`\u5B9A\u65F6\u4EFB\u52A1\u5DF2\u6267\u884C: ${query.time}`);
+      new import_obsidian2.Notice(`Timed task executed: ${query.time}.`);
     } catch (error) {
       console.error("Error executing timed query:", error);
-      new import_obsidian3.Notice(`\u5B9A\u65F6\u4EFB\u52A1\u6267\u884C\u5931\u8D25: ${query.time}`);
+      new import_obsidian2.Notice(`Timed task execution failed: ${query.time}`);
     } finally {
       this.isTriggerGenerating = false;
       this.processNextTrigger();
     }
   }
-  processNextTrigger() {
+  async processNextTrigger() {
     if (this.triggerQueue.length > 0) {
       const nextQuery = this.triggerQueue.shift();
       if (nextQuery) {
-        this.executeTimedQuery(nextQuery);
+        await this.executeTimedQuery(nextQuery);
       }
     }
   }
@@ -1025,19 +506,19 @@ ${content}`;
     try {
       const flomoApiUrl = this.settings.flomoApiKey;
       if (!flomoApiUrl.startsWith("https://flomoapp.com/iwh/")) {
-        new import_obsidian3.Notice("Flomo API URL\u683C\u5F0F\u4E0D\u6B63\u786E");
+        new import_obsidian2.Notice("Flomo API URL format is incorrect.");
         return;
       }
-      const response = await fetch(flomoApiUrl, {
+      const response = await (0, import_obsidian2.requestUrl)({
+        url: flomoApiUrl,
         method: "POST",
         headers: {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({ content })
       });
-      if (response.ok) {
-        console.log("Flomo\u53D1\u9001\u6210\u529F");
-        new import_obsidian3.Notice("\u7ED3\u679C\u5DF2\u53D1\u9001\u5230Flomo");
+      if (response.status === 200) {
+        new import_obsidian2.Notice("Send Flomo Success");
       } else {
         let errorMsg = `HTTP\u9519\u8BEF ${response.status}`;
         try {
@@ -1045,19 +526,18 @@ ${content}`;
           errorMsg += `: ${JSON.stringify(errorData)}`;
           console.error("Flomo\u53D1\u9001\u5931\u8D25:", errorMsg);
         } catch (e) {
-          const errorText = await response.text();
+          const errorText = response.text;
           errorMsg += `: ${errorText.substring(0, 100)}...`;
           console.error("Flomo\u53D1\u9001\u5931\u8D25:", errorMsg);
         }
-        new import_obsidian3.Notice("Flomo\u53D1\u9001\u5931\u8D25");
+        new import_obsidian2.Notice("Send Flomo Failed");
       }
     } catch (error) {
       console.error("Flomo\u53D1\u9001\u5931\u8D25:", error);
-      new import_obsidian3.Notice("Flomo\u53D1\u9001\u5931\u8D25");
+      new import_obsidian2.Notice("Send Flomo Failed");
     }
   }
   async *sendTimedQueryToAI(prompt, content) {
-    var _a;
     if (!this.settings.deepseekApiKey) {
       throw new Error("Deepseek API Key not set");
     }
@@ -1068,7 +548,8 @@ ${content}`;
 ${content}` }
     ];
     const uniqueRequestId = this.generateSessionId();
-    const response = await fetch("https://api.deepseek.com/v1/chat/completions", {
+    const response = await (0, import_obsidian2.requestUrl)({
+      url: "https://api.deepseek.com/v1/chat/completions",
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -1083,45 +564,16 @@ ${content}` }
         user: uniqueRequestId
       })
     });
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(`API Error: ${response.status} - ${((_a = errorData.error) == null ? void 0 : _a.message) || "Unknown error"}`);
-    }
-    if (!response.body) {
+    if (!response.text) {
       throw new Error("Response body is not a readable stream");
     }
-    const reader = response.body.getReader();
+    const reader = response.text;
     const decoder = new TextDecoder("utf-8");
     let done = false;
-    while (!done) {
-      const { value, done: readerDone } = await reader.read();
-      done = readerDone;
-      const chunk = decoder.decode(value);
-      const lines = chunk.split("\n").filter((line) => line.trim());
-      for (const line of lines) {
-        if (line.startsWith("data: ")) {
-          const jsonStr = line.slice(6);
-          if (jsonStr === "[DONE]") {
-            return;
-          }
-          try {
-            const data = JSON.parse(jsonStr);
-            const delta = data.choices[0].delta;
-            if (delta.content) {
-              yield delta.content;
-            }
-          } catch (error) {
-            console.error("Error parsing streaming data:", error);
-          }
-        }
-      }
-    }
   }
   async createDefaultPromptFile() {
     const filePath = this.settings.defaultPromptFile;
-    console.log(`[TaskAI] Checking file: ${filePath}`);
     const exists = await this.app.vault.adapter.exists(filePath);
-    console.log(`[TaskAI] File ${filePath} exists: ${exists}`);
     if (!exists) {
       const defaultContent = `\u4F60\u662F\u4E00\u4E2A\u4EFB\u52A1\u7BA1\u7406\u4E0E\u4E8B\u9879\u5206\u6790\u7684\u4E13\u5BB6\uFF0C\u8BF7\u534F\u52A9\u6211\u8FDB\u884C\u5206\u6790\u3002`;
       await this.app.vault.create(filePath, defaultContent);
@@ -1129,5 +581,20 @@ ${content}` }
       return true;
     }
     return false;
+  }
+  async getDailyNotesConfigFromFile() {
+    try {
+      const configPath = ".obsidian/config";
+      if (!await this.app.vault.adapter.exists(configPath)) {
+        console.error("config \u6587\u4EF6\u4E0D\u5B58\u5728");
+        return null;
+      }
+      const configContent = await this.app.vault.adapter.read(configPath);
+      const config = JSON.parse(configContent);
+      return config["daily-notes"] || null;
+    } catch (error) {
+      console.error("\u8BFB\u53D6\u6216\u89E3\u6790 config \u6587\u4EF6\u5931\u8D25:", error);
+      return null;
+    }
   }
 };
