@@ -26,6 +26,7 @@
 - Update Notice: This plugin will currently only use Deepseek's interpretation model. I will adjust it based on community feedback if time permits.
 
 - This plugin is designed for people like me who are not used to strictly defined syntax like Tasks. It uses AI to automatically list daily tasks.
+	- The biggest advantage is that you can simultaneously experience the editing freedom of **not having to adhere to tag formats** and the precision of automation tools **integrating and assisting with to-do list consolidation**.
 
 - Before using all features, you need to register a Deepseek Open Platform account, obtain an API Key, and deposit a certain amount of money. Link: [Deepseek Open Platform](https://platform.deepseek.com/register)
 
