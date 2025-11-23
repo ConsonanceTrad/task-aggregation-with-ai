@@ -196,7 +196,6 @@ var TaskAISettingsTab = class extends import_obsidian.PluginSettingTab {
         testButton.addEventListener("click", async () => {
           new import_obsidian.Notice("Start execution of timed query.");
           this.plugin.executeTimedQuery(query);
-          new import_obsidian.Notice("Rules have been executed.");
         });
         const deleteButton = actionCell.createEl("button", { cls: "timed-queries-delete-button" });
         deleteButton.createEl("span", { cls: "obsidian-icon", text: "\u232B" });
@@ -477,10 +476,9 @@ ${content}`;
       }
       const finalContent = `${targetFileContent}`;
       await this.app.vault.adapter.write(targetFilePath, finalContent);
-      let aiResponse = "";
-      for await (const chunk of this.sendTimedQueryToAI(promptContent, targetFileContent + additionalContent)) {
-        await this.app.vault.adapter.append(targetFilePath, chunk);
-        aiResponse += chunk;
+      let aiResponse = await this.sendTimedQueryToAI(promptContent, targetFileContent + additionalContent);
+      if (aiResponse) {
+        await this.app.vault.adapter.append(targetFilePath, aiResponse);
       }
       if (this.settings.isFlomoEnabled && this.settings.flomoApiKey) {
         await this.sendToFlomo(aiResponse);
@@ -537,7 +535,7 @@ ${content}`;
       new import_obsidian2.Notice("Send Flomo Failed");
     }
   }
-  async *sendTimedQueryToAI(prompt, content) {
+  async sendTimedQueryToAI(prompt, content) {
     if (!this.settings.deepseekApiKey) {
       throw new Error("Deepseek API Key not set");
     }
@@ -548,39 +546,93 @@ ${content}`;
 ${content}` }
     ];
     const uniqueRequestId = this.generateSessionId();
-    const response = await (0, import_obsidian2.requestUrl)({
-      url: "https://api.deepseek.com/v1/chat/completions",
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${this.settings.deepseekApiKey}`
-      },
-      body: JSON.stringify({
-        model: this.settings.deepseekModel,
-        messages,
-        temperature: 0.7,
-        top_p: 0.95,
-        stream: true,
-        user: uniqueRequestId
-      })
-    });
-    if (!response.text) {
-      throw new Error("Response body is not a readable stream");
+    let fullResponse = "";
+    try {
+      const response = await (0, import_obsidian2.requestUrl)({
+        url: "https://api.deepseek.com/v1/chat/completions",
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${this.settings.deepseekApiKey}`
+        },
+        body: JSON.stringify({
+          model: this.settings.deepseekModel,
+          messages,
+          temperature: 0.7,
+          top_p: 0.95,
+          stream: false,
+          user: uniqueRequestId
+        })
+      });
+      if (response.status === 200 && response.text) {
+        try {
+          const data = JSON.parse(response.text);
+          if (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) {
+            fullResponse = data.choices[0].message.content;
+          }
+        } catch (parseError) {
+          console.error("Error parsing non-stream response:", parseError);
+          fullResponse = this.parseStreamData(response.text);
+        }
+      } else {
+        console.error(`API request failed with status: ${response.status}`);
+        if (response.text) {
+          fullResponse = this.parseStreamData(response.text);
+        }
+      }
+    } catch (error) {
+      console.error("Error in API request:", error);
+      try {
+        const response = await (0, import_obsidian2.requestUrl)({
+          url: "https://api.deepseek.com/v1/chat/completions",
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${this.settings.deepseekApiKey}`
+          },
+          body: JSON.stringify({
+            model: this.settings.deepseekModel,
+            messages,
+            temperature: 0.7,
+            top_p: 0.95,
+            stream: true,
+            user: uniqueRequestId
+          })
+        });
+        if (response.text) {
+          fullResponse = this.parseStreamData(response.text);
+        }
+      } catch (streamError) {
+        console.error("Stream request also failed:", streamError);
+        throw new Error("Failed to get response from AI API");
+      }
     }
-    const reader = response.text;
-    const decoder = new TextDecoder("utf-8");
-    let done = false;
+    return fullResponse;
   }
-  async createDefaultPromptFile() {
-    const filePath = this.settings.defaultPromptFile;
-    const exists = await this.app.vault.adapter.exists(filePath);
-    if (!exists) {
-      const defaultContent = `\u4F60\u662F\u4E00\u4E2A\u4EFB\u52A1\u7BA1\u7406\u4E0E\u4E8B\u9879\u5206\u6790\u7684\u4E13\u5BB6\uFF0C\u8BF7\u534F\u52A9\u6211\u8FDB\u884C\u5206\u6790\u3002`;
-      await this.app.vault.create(filePath, defaultContent);
-      console.log(`[TaskAI] Created default prompt file: ${filePath}`);
-      return true;
+  parseStreamData(text) {
+    let fullContent = "";
+    const lines = text.split("\n").filter((line) => line.trim());
+    for (const line of lines) {
+      if (line.startsWith("data: ")) {
+        const jsonStr = line.slice(6);
+        if (jsonStr === "[DONE]") {
+          break;
+        }
+        try {
+          const data = JSON.parse(jsonStr);
+          if (data.choices && data.choices[0]) {
+            if (data.choices[0].delta && data.choices[0].delta.content) {
+              fullContent += data.choices[0].delta.content;
+            } else if (data.choices[0].message && data.choices[0].message.content) {
+              fullContent += data.choices[0].message.content;
+            }
+          }
+        } catch (error) {
+          console.error("Error parsing stream data line:", error);
+        }
+      }
     }
-    return false;
+    return fullContent;
   }
   async getDailyNotesConfigFromFile() {
     try {

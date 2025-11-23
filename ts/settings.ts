@@ -340,7 +340,7 @@ export class TaskAISettingsTab extends PluginSettingTab {
 					new Notice('Start execution of timed query.');
 					// 调用主程序的executeTimedQuery方法执行一次查询
 					this.plugin.executeTimedQuery(query);
-					new Notice('Rules have been executed.');
+					// new Notice('Rules have been executed.');
 				});
 				// 删除按钮
 				const deleteButton = actionCell.createEl('button', { cls: 'timed-queries-delete-button' });

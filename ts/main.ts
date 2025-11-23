@@ -751,11 +751,10 @@ Note: The more prompt and task information, the longer it will take to generate.
 			const finalContent = `${targetFileContent}`;
 			await this.app.vault.adapter.write(targetFilePath, finalContent);
 			
-			// 流式处理AI响应并逐块写入文件
-			let aiResponse = '';
-			for await (const chunk of this.sendTimedQueryToAI(promptContent, targetFileContent + additionalContent)) {
-				await this.app.vault.adapter.append(targetFilePath, chunk);
-				aiResponse += chunk;
+			// 获取AI响应并直接写入文件
+			let aiResponse = await this.sendTimedQueryToAI(promptContent, targetFileContent + additionalContent);
+			if (aiResponse) {
+				await this.app.vault.adapter.append(targetFilePath, aiResponse);
 			}
 
 			// 如果Flomo集成已启用且API Key已设置，将结果发送到Flomo
@@ -829,7 +828,7 @@ Note: The more prompt and task information, the longer it will take to generate.
 		}
 	}
 
-	private async *sendTimedQueryToAI(prompt: string, content: string): AsyncGenerator<string, void, undefined> {
+	private async sendTimedQueryToAI(prompt: string, content: string): Promise<string> {
 		if (!this.settings.deepseekApiKey) {
 			throw new Error('Deepseek API Key not set');
 		}
@@ -838,78 +837,134 @@ Note: The more prompt and task information, the longer it will take to generate.
 			{ role: 'system', content: prompt },
 			{ role: 'user', content: `请分析以下内容：\n\n${content}` }
 		];
+		// console.log(`[TaskAI] 向AI发送请求: ${JSON.stringify(messages)}`);
 
 		// 为每次自动问询生成唯一ID
 		const uniqueRequestId = this.generateSessionId();
 
-		const response = await requestUrl({
-			url: 'https://api.deepseek.com/v1/chat/completions',
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-				'Authorization': `Bearer ${this.settings.deepseekApiKey}`
-			},
-			body: JSON.stringify({
-				model: this.settings.deepseekModel,
-				messages: messages,
-				temperature: 0.7,
-				top_p: 0.95,
-				stream: true, // 启用流式响应
-				user: uniqueRequestId // 使用唯一ID作为用户标识，确保每次请求独立
-			})
-		});
+		// 存储完整的AI响应内容
+		let fullResponse = '';
 
-		if (!response.text) {
-			throw new Error('Response body is not a readable stream');
+		// 先尝试使用非流式请求（更符合requestUrl的使用方式）
+		try {
+			const response = await requestUrl({
+				url: 'https://api.deepseek.com/v1/chat/completions',
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					'Authorization': `Bearer ${this.settings.deepseekApiKey}`
+				},
+				body: JSON.stringify({
+					model: this.settings.deepseekModel,
+					messages: messages,
+					temperature: 0.7,
+					top_p: 0.95,
+					stream: false, // 使用非流式请求
+					user: uniqueRequestId
+				})
+			});
+			// console.log(`[TaskAI] 从AI接收非流式响应: ${response.text}`);
+
+			// 处理非流式响应
+			if (response.status === 200 && response.text) {
+				try {
+					const data = JSON.parse(response.text);
+					if (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) {
+						fullResponse = data.choices[0].message.content;
+					}
+				} catch (parseError) {
+					console.error('Error parsing non-stream response:', parseError);
+					// 如果非流式解析失败，尝试作为流式数据处理
+					fullResponse = this.parseStreamData(response.text);
+				}
+			} else {
+				console.error(`API request failed with status: ${response.status}`);
+				// 如果请求失败且有响应内容，尝试解析
+				if (response.text) {
+					fullResponse = this.parseStreamData(response.text);
+				}
+			}
+		} catch (error) {
+			console.error('Error in API request:', error);
+			// 再次尝试使用流式请求作为备选方案
+			try {
+				const response = await requestUrl({
+					url: 'https://api.deepseek.com/v1/chat/completions',
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+						'Authorization': `Bearer ${this.settings.deepseekApiKey}`
+					},
+					body: JSON.stringify({
+						model: this.settings.deepseekModel,
+						messages: messages,
+						temperature: 0.7,
+						top_p: 0.95,
+						stream: true,
+						user: uniqueRequestId
+					})
+				});
+
+				if (response.text) {
+					fullResponse = this.parseStreamData(response.text);
+				}
+			} catch (streamError) {
+				console.error('Stream request also failed:', streamError);
+				throw new Error('Failed to get response from AI API');
+			}
 		}
 
-		const reader = response.text;
-		const decoder = new TextDecoder('utf-8');
-		let done = false;
-
-		// while (!done) {
-		// 	const { value, done: readerDone } = await reader.read();
-		// 	done = readerDone;
-		// 	const chunk = decoder.decode(value);
-
-		// 	// 处理流式响应数据
-		// 	const lines = chunk.split('\n').filter(line => line.trim());
-
-		// 	for (const line of lines) {
-		// 		if (line.startsWith('data: ')) {
-		// 			const jsonStr = line.slice(6);
-		// 			if (jsonStr === '[DONE]') {
-		// 				return; // 结束流
-		// 			}
-		// 			try {
-		// 				const data = JSON.parse(jsonStr);
-		// 				const delta = data.choices[0].delta;
-		// 				if (delta.content) {
-		// 					yield delta.content; // 生成流式内容
-		// 				}
-		// 			} catch (error) {
-		// 				console.error('Error parsing streaming data:', error);
-		// 				// 忽略解析错误，继续处理下一个chunk
-		// 			}
-		// 		}
-		// 	}
-		// }
+		return fullResponse;
 	}
 
-	private async createDefaultPromptFile(): Promise<boolean> {
-		const filePath = this.settings.defaultPromptFile;
-		// console.log(`[TaskAI] Checking file: ${filePath}`);
-		const exists = await this.app.vault.adapter.exists(filePath);
-		// console.log(`[TaskAI] File ${filePath} exists: ${exists}`);
-		if (!exists) {
-			// 默认提示词内容
-			const defaultContent = `你是一个任务管理与事项分析的专家，请协助我进行分析。`;
-			await this.app.vault.create(filePath, defaultContent);
-			console.log(`[TaskAI] Created default prompt file: ${filePath}`);
-			return true;
+	// 辅助方法：解析流式响应数据
+	private parseStreamData(text: string): string {
+		let fullContent = '';
+		const lines = text.split('\n').filter(line => line.trim());
+
+		for (const line of lines) {
+			if (line.startsWith('data: ')) {
+				const jsonStr = line.slice(6);
+				if (jsonStr === '[DONE]') {
+					break;
+				}
+				try {
+					const data = JSON.parse(jsonStr);
+					// 支持不同格式的响应结构
+					if (data.choices && data.choices[0]) {
+						// 流式响应格式
+						if (data.choices[0].delta && data.choices[0].delta.content) {
+							fullContent += data.choices[0].delta.content;
+						}
+						// 完整响应格式
+						else if (data.choices[0].message && data.choices[0].message.content) {
+							fullContent += data.choices[0].message.content;
+						}
+					}
+				} catch (error) {
+					console.error('Error parsing stream data line:', error);
+					// 忽略解析错误，继续处理下一行
+				}
+			}
 		}
-		return false;
+
+		return fullContent;
 	}
+
+	// private async createDefaultPromptFile(): Promise<boolean> {
+	// 	const filePath = this.settings.defaultPromptFile;
+	// 	// console.log(`[TaskAI] Checking file: ${filePath}`);
+	// 	const exists = await this.app.vault.adapter.exists(filePath);
+	// 	// console.log(`[TaskAI] File ${filePath} exists: ${exists}`);
+	// 	if (!exists) {
+	// 		// 默认提示词内容
+	// 		const defaultContent = `你是一个任务管理与事项分析的专家，请协助我进行分析。`;
+	// 		await this.app.vault.create(filePath, defaultContent);
+	// 		console.log(`[TaskAI] Created default prompt file: ${filePath}`);
+	// 		return true;
+	// 	}
+	// 	return false;
+	// }
 
 	public async getDailyNotesConfigFromFile(): Promise<DailyConfig['daily-notes'] | null> {
 		try {
